@@ -1,0 +1,7 @@
+Filename_given_for_scripts	Sheet number if valid	Description of content	Link to download	Reference DOI
+18S_V9_1476_samples.OTU.filtered.cleaved.nosubstringOTUs.taxo		V9 taxonomy assignment data	https://zenodo.org/record/6794351/files/18S_V9_1476_samples.OTU.filtered.cleaved.nosubstringOTUs.taxo.tsv.gz?download=1	https://doi.org/10.5281/zenodo.6794351
+Table_S04_distributions_nr_SMAGs_for_SAGs_for_all.xlsx	4	SMAG taxonomy assignment data	https://www.genoscope.cns.fr/tara/localdata/data/SMAGs-v1/Supplemental_Tables.zip	https://doi.org/10.1101/2020.10.15.341214
+Table_S04_distributions_nr_SMAGs_for_SAGs_for_all.xlsx	7	SMAG abundance data	https://www.genoscope.cns.fr/tara/localdata/data/SMAGs-v1/Supplemental_Tables.zip	https://doi.org/10.1101/2020.10.15.341214
+18S_V9_1476_samples.OTU.filtered.cleaved.nosubstringOTUs.mumu.dereplicated.table (3)		V9 abundance data	https://zenodo.org/record/6794351/files/18S_V9_1476_samples.OTU.filtered.cleaved.nosubstringOTUs.mumu.dereplicated.table.gz?download=1	https://doi.org/10.5281/zenodo.6794351
+TARA_CONTEXT_95_SEQ_STATIONS_V9.tsv		Sampling event information for V9	https://doi.pangaea.de/10.1594/PANGAEA.843017	https://doi.org/10.1126/science.1261605
+TARA_CONTEXT_95_SEQ_STATIONS.txt.gz		Sampling event information for SMAGs	https://doi.pangaea.de/10.1594/PANGAEA.840718?format=html#download	https://doi.org/10.1594/PANGAEA.853810

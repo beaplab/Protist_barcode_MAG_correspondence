@@ -1,0 +1,49 @@
+taxa_SMAGs,taxogroup_V9,supergroup,taxogroup_1,taxogroup_2,taxogroup_middle,genus
+Attheya,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Biddulphiophyceae,g:Attheya
+Aureococcus,Pelagophyceae,Stramenopiles,Ochrophyta,Pelagophyceae,Pelagomonadales,g:Aureococcus
+Bathycoccus,Mamiellophyceae,Chloroplastida,Ochrophyta,Mamiellophyceae,Bathycoccaceae,g:Bathycoccus
+Cafeteria,Bicoecea,Stramenopiles,Opalozoa,Bicosoecida,core-bicosoecids,g:Cafeteria
+Chaetoceros,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Mediophyceae,g:Chaetoceros
+Cylindrotheca,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Bacillariophyceae,g:Cylindrotheca
+Emiliania,Haptophyta,Haptophyta,Prymnesiophyceae,Prymnesiophyceae,Isochrysidales,g:Emiliania
+Florenciella,Dictyochophyceae,Stramenopiles,Ochrophyta,Dictyochophyceae,Florenciellales,NA
+Fragilariopsis,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Bacillariophyceae,g:Fragilariopsis
+Geminigera,Cryptophyta,Cryptophyceae,Cryptomonadales,Cryptomonadales,lineage-B,g:Geminigera
+Haptolina,Haptophyta,Haptophyta,Prymnesiophyceae,Prymnesiophyceae,Prymnesiaceae,g:Haptolina
+Leptocylindrus,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Leptocylindrophyceae,g:Leptocylindrus
+Mantoniella,Mamiellophyceae,Chloroplastida,Chlorophyta,Mamiellophyceae,Mamiellaceae,g:Mantoniella
+Micromonas,Mamiellophyceae,Chloroplastida,Chlorophyta,Mamiellophyceae,Mamiellaceae,g:Micromonas
+Minidiscus,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Mediophyceae,g:Minidiscus
+Minutocellus,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Mediophyceae,g:Minutocellus
+Ostreococcus,Mamiellophyceae,Chloroplastida,Chlorophyta,Mamiellophyceae,Bathycoccaceae,g:Ostreococcus
+Pelagococcus,Pelagophyceae,Stramenopiles,Ochrophyta,Pelagophyceae,Pelagomonadales,g:Pelagococcus
+Phaeocystis,Haptophyta,Haptophyta,Prymnesiophyceae,Prymnesiophyceae,Phaeocystales,g:Phaeocystis
+Picochlorum,Trebouxiophyceae,Chloroplastida,Chlorophyta,Trebouxiophyceae,Chlorellales,g:Picochlorum
+Prasinoderma,other prasinophytes,Chloroplastida,Palmophyllophyceae,Prasinoderma-clade,Prasinoderma-clade,g:Prasinoderma
+Pseudo-nitzschia,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Bacillariophyceae,g:Pseudo-nitzschia
+Pycnococcus,Prasinophyceae Clade 7,Chloroplastida,Chlorophyta,Pycnococcaceae,Pycnococcaceae,g:Pycnococcus
+Sister_Pelagomonas,Pelagophyceae,Stramenopiles,Ochrophyta,Pelagophyceae,Pelagomonadales,g:Pelagomonas
+Skeletonema,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Mediophyceae,g:Skeletonema
+Strombidium,Ciliophora,Alveolata,Ciliophora,Spirotrichea,Oligotrichia,Sapolatum-clade
+Synedropsis,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Bacillariophyceae,g:Synedropsis
+Thalassiosira,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,Mediophyceae,g:Thalassiosira
+New_Bacillariaceae_01,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,NA,NA
+New_Bicosoecales_01,Bicoecea,Stramenopiles,Opalozoa,Bicosoecida,NA,NA
+New_Choanozoa_01,Choanoflagellatea,Opisthokonta,Choanoflagellata,NA,NA,NA
+New_Choreotrichida _01,Ciliophora,Alveolata,Ciliophora,Spirotrichea,Oligotrichia,NA
+New_Chrysochromulinaceae_01,Haptophyta,Haptophyta,Prymnesiophyceae,Prymnesiophyceae,Chrysochromulinaceae,NA
+New_Ciliophora_01,Ciliophora,Alveolata,Ciliophora,NA,NA,NA
+New_Cyrtolophosidida_01,Ciliophora,Alveolata,Ciliophora,Colpodea,Cyrtolophosidida,NA
+New_Haptophyta_01,Haptophyta,Haptophyta,NA,NA,NA,NA
+New_MALV-I_01,MALV-I,Alveolata,Dinoflagellata,MALV-I,NA,NA
+New_MALV-II_01,MALV-II,Alveolata,Dinoflagellata,MALV-II,NA,NA
+New_MAST-4,"MAST-4, 6, 7, 8, 9, 10, 11",Stramenopiles,Sagenista,MAST-04,NA,NA
+MALV-I,MALV-I,Alveolata,Dinoflagellata,MALV-I,NA,NA
+MALV-II,MALV-II,Alveolata,Dinoflagellata,MALV-II,NA,NA
+New_Chrysophyceae,Ochrophyta,Stramenopiles,Ochrophyta,Chrysophyceae,NA,NA
+Unidentified_Bacillariaceae,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,NA,NA
+Unidentified_Cercozoa,Cercozoa,Rhizaria,Cercozoa,NA,NA,NA
+Chloropicon,,Chloroplastida,Chlorophyta,Chloropicophyceae,Chloropicophyceae,g:Chloropicon
+chloroparvula,,Chloroplastida,Chlorophyta,Chloropicophyceae,Chloropicophyceae,g:Chloroparvula
+New_Bacillariaceae_02,Bacillariophyta,Stramenopiles,Ochrophyta,Diatomeae,NA,NA
+New_Chlorophyta_01,,Chloroplastida,Chlorophyta,NA,NA,NA
