@@ -1,0 +1,206 @@
+---
+title: "se_stats_shuffle"
+author: "Zavadska Daryna"
+date: "2023-01-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+#library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+
+```{r}
+
+best3 <- list.files(pattern = "se_summary_shuffle_stats")
+df <-data.frame()
+
+for (i in c(1:length(best3))) {
+data <- fread(best3[i])
+ df<- rbind(df, data)
+
+}
+
+#vocabulary <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_inputs/final_taxa_ext_genus.csv")
+
+#df$taxogroup<-NA
+
+#for (i in c(1:nrow(df))){
+#  colnumer<-which(colnames(vocabulary)==df$taxlevel[i])
+#  vocabulary_dummy <- vocabulary %>% select(all_of(colnumer))
+#  vocabulary_dummy$taxa_SMAGs <- vocabulary$taxa_SMAGs
+#  df$taxogroup[i]<-as.character(vocabulary_dummy[which(vocabulary$taxa_SMAGs==df$organism[i]),1][1])
+#}
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+df$organism_CB <- NA
+
+for (org_sim in unique(df$organism)) {
+  
+  df$organism_CB[which(df$organism == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+
+df$taxlevel[which(df$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+df$taxlevel[which(df$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+df$taxlevel[which(df$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+####################################
+
+
+df$metrtaxlvl <- paste0(df$metrics, df$taxlevel)
+df_to_plot_rho <- df[which(df$metrics=="rho"),]
+df_to_plot_cor <- df[which(df$metrics=="cor"),]
+df_to_plot_phi <- df[which(df$metrics=="phi"),]
+df_to_plot_phs <- df[which(df$metrics=="phs"),]
+df_to_plot_vlr <- df[which(df$metrics=="vlr"),]
+
+```
+
+
+#loop for all metrics
+
+```{r}
+
+diffmetr <- c("cor", "phi", "phs", "vlr","rho" )
+
+
+
+for ( metrics_type in diffmetr){
+  
+  df_to_plot_rho <- df[which(df$metrics==metrics_type),]
+  
+  if (metrics_type == "vlr") {plot_fin <- ggplot(df_to_plot_rho, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+
+  #geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "bottom")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+ggtitle(metrics_type)}
+  
+  
+  else{plot_fin <- ggplot(df_to_plot_rho, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+
+  #geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="none")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+ggtitle(metrics_type)}
+  
+  
+  
+   ggsave(paste0("shuffle_se_",metrics_type, ".pdf"),
+  plot = plot_fin,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 11,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+
+}
+  
+  
+```
+
+
+
+#SE shuffle plots
+
+```{r}
+
+
+
+rhopl <- ggplot(df_to_plot_rho, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+
+  #geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+ggtitle("rho")
+  
+
+corpl <- ggplot(df_to_plot_cor, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxogroup V9")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+ggtitle("cor")
+  
+phipl <-ggplot(df_to_plot_phi, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxogroup V9")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+ggtitle("phi")
+
+
+phspl <-ggplot(df_to_plot_phs, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxogroup V9")+ylab("Standard deviation")+
+  xlab("Number of iterations")+ guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+ggtitle("phs")
+
+vlrpl <- ggplot(df_to_plot_vlr, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(metrtaxlvl))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = metrtaxlvl, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxogroup V9")+ylab("Standard deviation")+
+  xlab("Number of iterations")+guides(fill = "none", linetype = "none", shape= "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "bottom")+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+ggtitle("vlr")
+
+
+
+all <- ggarrange(rhopl, corpl, phipl, phspl, vlrpl, ncol=1, nrow=5, common.legend = TRUE, legend="bottom")
+
+```
+

@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+author: "Zavadska Daryna"
+date: "2023-08-30"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+#library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+library(stringr)
+```
+
+```{r}
+
+df <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/Candidate_pairs-for_R_script_scatterplot_corrected_Pairs_automated.csv")
+
+```
+
+```{r}
+df$scenario <- NA
+
+for (genre in unique(df$GENRE)) {
+  #genre <- 'chloroparvula'
+  tmp <- df[df$GENRE == genre, ]
+  
+  for (md5sum in unique(tmp$md5sum)) {
+    
+    #md5sum <- "c605ef53efb8ebba4670b2121fb6d43e69217b7e"
+
+    mdsumrow <- which(tmp$md5sum == md5sum)
+    #print(nrow(tmp[mdsumrow, ]))
+    #print(length(unique(tmp[tmp$md5sum == md5sum, 2])))
+    
+    V9row <- nrow(tmp[mdsumrow, ])
+    SMAGrow <- length(unique(tmp$SMAG[mdsumrow]))
+    
+    if ( V9row == 1 & SMAGrow == 1 ) {
+      df$scenario[which(df$GENRE == genre & df$md5sum == md5sum)] <- "IV"
+    }
+    
+    
+    if (V9row > 1 & SMAGrow > 1 & V9row == SMAGrow & SMAGrow == length(which((tmp$SMAG %in% unique(tmp$SMAG[mdsumrow]))==TRUE)) ) {
+      df$scenario[which(df$GENRE == genre & df$md5sum == md5sum)] <- "I"
+    }
+  
+    if (V9row > 1 & SMAGrow > 1 & V9row == SMAGrow & SMAGrow < length(which((tmp$SMAG %in% unique(tmp$SMAG[mdsumrow]))==TRUE)) ) {
+      df$scenario[which(df$GENRE == genre & df$md5sum == md5sum)] <- "II"
+    }
+    
+    if (V9row == 1 & SMAGrow == 1 & V9row == SMAGrow & SMAGrow < length(which((tmp$SMAG %in% unique(tmp$SMAG[mdsumrow]))==TRUE)) ) {
+      df$scenario[which(df$GENRE == genre & df$md5sum == md5sum)] <- "III"
+    }
+  }
+}
+
+
+
+write.csv(df, '/home/dzavadska/Data/MAGs/REF2branch/data_outputs/Scenarios_auto_assigned_candidate_pairs.csv')
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

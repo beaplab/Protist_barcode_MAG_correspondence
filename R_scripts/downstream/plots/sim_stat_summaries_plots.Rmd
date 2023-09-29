@@ -1,0 +1,945 @@
+---
+title: "sim_stats_plots"
+author: "Zavadska Daryna"
+date: "2023-02-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+#library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+library(ggrepel)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+```{r}
+
+
+##subsetting to_plot_rho_shuffle1 to non-unique matches
+
+to_plot_rho_shuffle1 <- fread("to_plot_rho_shuffle1.tsv")
+
+
+to_plot_rho_shuffle1$org_md5sum_taxlvl <- paste0(to_plot_rho_shuffle1$organism,to_plot_rho_shuffle1$md5sum, to_plot_rho_shuffle1$taxlevel)
+
+to_plot_rho_shuffle1[which(duplicated(to_plot_rho_shuffle1$org_md5sum_taxlvl, fromLast=TRUE)==TRUE),]
+
+
+sim_onlyv9_stats <- fread("summary_sim_stats_onlyv9_all.tsv")
+
+sim_onlyv9_stats <- sim_onlyv9_stats[which(sim_onlyv9_stats$metrics == "rho"),]
+
+colnames(sim_onlyv9_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth")
+
+sim_onlyv9_stats$orgtaxlvltop <- paste0(sim_onlyv9_stats$top, sim_onlyv9_stats$organism, sim_onlyv9_stats$taxlevel)
+
+#merging real data with simulations to have single dataset to plot
+#colnames(to_plot_rho_shuffle1)
+#colnames(sim_onlyv9_stats)
+
+sim_onlyv9_stats_to_merge <- sim_onlyv9_stats[,c(1,2,5,7,9)]
+colnames(sim_onlyv9_stats_to_merge) <- c("organism","taxlevel","rho", "tops", "iteration_count")
+
+sim_onlyv9_stats_to_merge$md5sum <- "Control simulation V9"
+sim_onlyv9_stats_to_merge$class <- "Simulation"
+
+
+to_plot_rho_shuffle1_to_merge <- to_plot_rho_shuffle1[,c(6,7,4,5,2)]
+colnames(to_plot_rho_shuffle1_to_merge) <- c("organism","taxlevel","rho", "tops", "md5sum")
+
+to_plot_rho_shuffle1_to_merge$iteration_count <- 1
+to_plot_rho_shuffle1_to_merge$class <- "Real data"
+
+
+
+
+#limiting the taxlevels of simulations to that shown for real data
+for ( org in levels(as.factor(sim_onlyv9_stats_to_merge$organism))) {
+  #org <- "Thalassiosira" 
+  ranks_shown <- levels(as.factor(to_plot_rho_shuffle1_to_merge$taxlevel[which(to_plot_rho_shuffle1_to_merge$organism == org)]))
+ 
+  remove_list <- intersect(
+  which(sim_onlyv9_stats_to_merge$organism == org),  which(sim_onlyv9_stats_to_merge$taxlevel %in% ranks_shown == FALSE)
+  )
+  
+  if (length(remove_list)>0) {
+      sim_onlyv9_stats_to_merge <- sim_onlyv9_stats_to_merge[-remove_list,]
+  }
+}
+#combining two plots together
+to_plot_sim <- rbind(to_plot_rho_shuffle1_to_merge,sim_onlyv9_stats_to_merge)
+
+#eliminating organisms with only 1 SMAG in the group
+to_plot_sim <- to_plot_sim[-grep("Attheya|Cafeteria|Leptocylindrus|Mantoniella|Picochlorum|Synedropsis", to_plot_sim$organism),]
+
+#adding a column to group the lines
+to_plot_sim$taxlevel_md5sum <- paste0(to_plot_sim$taxlevel, to_plot_sim$md5sum)
+
+
+#creating a fake variable that in theory allows distinguishing between 
+to_plot_sim$md5sum_fakeid <- NA
+
+to_plot_sim$orgtaxlevel <- paste0(to_plot_sim$organism, to_plot_sim$taxlevel)
+
+for (org in levels(as.factor(to_plot_sim$orgtaxlevel))) {
+
+  #org <- "Thalassiosirataxogroup_middle"
+  subs <- which(to_plot_sim$orgtaxlevel == org)
+  #if (length(subs)==0) {next}
+  
+  md5sum_list <- unique(to_plot_sim$md5sum[subs])
+  
+  for (fakecat in c(1:length(md5sum_list))) {
+    
+  print(intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat])))
+    
+    
+   to_plot_sim$md5sum_fakeid[intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat]))] <- fakecat
+  }
+  
+}
+  
+#eliminating bitch taxa with too many SMAGs... Dont actually know what to do with them
+#to_plot_sim <- to_plot_sim[-grep("MAST-4|New_Chrysochromulinaceae|New_Chrysophyceae|New_Choanozoa|New_Choreotrichida_01", to_plot_sim$organism),]
+
+to_plot_sim$class_taxlevel = paste0(to_plot_sim$class, ", ",to_plot_sim$taxlevel)
+
+to_plot_sim$tops <- as.numeric(to_plot_sim$tops)
+to_plot_sim$rho <- as.numeric(to_plot_sim$rho)
+
+to_plot_sim$class[which(to_plot_sim$rho >1)]
+
+ggplot(to_plot_sim, aes(x=tops, y=rho, colour = as.factor(md5sum_fakeid), fill = taxlevel)) + #geom_violin()+
+  #geom_point( size = 0.1, alpha = 0.6, aes(shape=class, colour = as.factor(class_taxlevel)))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(23,8))+
+  scale_color_manual(values = colors[c(4,24,7,43,39, 15, 34, 29)],limits = c( "Real data, supergroup", "Real data, taxogroup_1", "Real data, taxogroup_2", "Real data, taxogroup_middle", "Real data, genus", "Simulation, taxogroup_2", "Simulation, taxogroup_middle", "Simulation, genus"))+geom_text(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf)+ 
+  #geom_text_repel(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf, min.segment.length = Inf)#
+  #scale_y_continuous(breaks = c(0.4,0.6,1))+
+  labs(colour= "Taxogroup V9")+ylab("Correlation/proportionality coefficient")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)) + ggtitle("Rho")
+  
+
+
+```
+
+
+#for all metrics
+```{r}
+diffmetr <- c("rho", "phi", "phs", "vlr", "cor")
+
+
+
+
+
+for ( metrics_type in diffmetr) {
+  
+  to_plot_rho_shuffle1 <- fread(paste0("to_plot_", metrics_type, "_shuffle1.tsv"))
+
+
+to_plot_rho_shuffle1$org_md5sum_taxlvl <- paste0(to_plot_rho_shuffle1$organism,to_plot_rho_shuffle1$md5sum, to_plot_rho_shuffle1$taxlevel)
+
+to_plot_rho_shuffle1[which(duplicated(to_plot_rho_shuffle1$org_md5sum_taxlvl, fromLast=TRUE)==TRUE),]
+
+
+sim_onlyv9_stats <- fread("summary_sim_stats_onlyv9_all.tsv")
+
+sim_onlyv9_stats <- sim_onlyv9_stats[which(sim_onlyv9_stats$metrics == metrics_type),]
+
+colnames(sim_onlyv9_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth")
+
+sim_onlyv9_stats$orgtaxlvltop <- paste0(sim_onlyv9_stats$top, sim_onlyv9_stats$organism, sim_onlyv9_stats$taxlevel)
+
+#merging real data with simulations to have single dataset to plot
+#colnames(to_plot_rho_shuffle1)
+#colnames(sim_onlyv9_stats)
+
+sim_onlyv9_stats_to_merge <- sim_onlyv9_stats[,c(1,2,5,7,9)]
+colnames(sim_onlyv9_stats_to_merge) <- c("organism","taxlevel","rho", "tops", "iteration_count")
+
+sim_onlyv9_stats_to_merge$md5sum <- "Control simulation V9"
+sim_onlyv9_stats_to_merge$class <- "Simulation"
+
+
+to_plot_rho_shuffle1_to_merge <- to_plot_rho_shuffle1[,c(6,7,4,5,2)]
+colnames(to_plot_rho_shuffle1_to_merge) <- c("organism","taxlevel","rho", "tops", "md5sum")
+
+to_plot_rho_shuffle1_to_merge$iteration_count <- 1
+to_plot_rho_shuffle1_to_merge$class <- "Real data"
+
+
+
+
+#limiting the taxlevels of simulations to that shown for real data
+for ( org in levels(as.factor(sim_onlyv9_stats_to_merge$organism))) {
+  #org <- "Thalassiosira" 
+  ranks_shown <- levels(as.factor(to_plot_rho_shuffle1_to_merge$taxlevel[which(to_plot_rho_shuffle1_to_merge$organism == org)]))
+ 
+  remove_list <- intersect(
+  which(sim_onlyv9_stats_to_merge$organism == org),  which(sim_onlyv9_stats_to_merge$taxlevel %in% ranks_shown == FALSE)
+  )
+  
+  if (length(remove_list)>0) {
+      sim_onlyv9_stats_to_merge <- sim_onlyv9_stats_to_merge[-remove_list,]
+  }
+}
+#combining two plots together
+to_plot_sim <- rbind(to_plot_rho_shuffle1_to_merge,sim_onlyv9_stats_to_merge)
+
+#eliminating organisms with only 1 SMAG in the group
+to_plot_sim <- to_plot_sim[-grep("Attheya|Cafeteria|Leptocylindrus|Mantoniella|Picochlorum|Synedropsis", to_plot_sim$organism),]
+
+#adding a column to group the lines
+to_plot_sim$taxlevel_md5sum <- paste0(to_plot_sim$taxlevel, to_plot_sim$md5sum)
+
+
+#creating a fake variable that in theory allows distinguishing between 
+to_plot_sim$md5sum_fakeid <- NA
+
+to_plot_sim$orgtaxlevel <- paste0(to_plot_sim$organism, to_plot_sim$taxlevel)
+
+for (org in levels(as.factor(to_plot_sim$orgtaxlevel))) {
+
+  #org <- "Thalassiosirataxogroup_middle"
+  subs <- which(to_plot_sim$orgtaxlevel == org)
+  #if (length(subs)==0) {next}
+  
+  md5sum_list <- unique(to_plot_sim$md5sum[subs])
+  
+  for (fakecat in c(1:length(md5sum_list))) {
+    
+  #print(intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat])))
+    
+    
+   to_plot_sim$md5sum_fakeid[intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat]))] <- fakecat
+  }
+  
+}
+  
+#eliminating bitch taxa with too many SMAGs... Dont actually know what to do with them
+#to_plot_sim <- to_plot_sim[-grep("MAST-4|New_Chrysochromulinaceae|New_Chrysophyceae|New_Choanozoa|New_Choreotrichida_01", to_plot_sim$organism),]
+
+to_plot_sim$class_taxlevel = paste0(to_plot_sim$class, ", ",to_plot_sim$taxlevel)
+  
+  
+      #eliminating bitch taxa with too many SMAGs... Dont actually know what to do with them
+#to_plot_sim <- to_plot_sim[-grep("MAST-4|New_Chrysochromulinaceae|New_Chrysophyceae|New_Choanozoa|New_Choreotrichida_01", to_plot_sim$organism),]
+
+
+
+to_plot_sim$tops <- as.numeric(to_plot_sim$tops)
+to_plot_sim$rho <- as.numeric(to_plot_sim$rho)
+
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+to_plot_sim$organism_CB <- NA
+
+for (org_sim in unique(to_plot_sim$organism)) {
+  
+  to_plot_sim$organism_CB[which(to_plot_sim$organism == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+
+to_plot_sim$taxlevel[which(to_plot_sim$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+to_plot_sim$taxlevel[which(to_plot_sim$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+to_plot_sim$taxlevel[which(to_plot_sim$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+
+to_plot_sim$class_taxlevel = paste0(to_plot_sim$class, ", ",to_plot_sim$taxlevel)
+####################################
+
+if(metrics_type == "vlr")
+{
+plot_fin <- ggplot(to_plot_sim, aes(x=tops, y=rho, colour = as.factor(md5sum_fakeid), fill = taxlevel)) + #geom_violin()+
+  #geom_point( size = 0.1, alpha = 0.6, aes(shape=class, colour = as.factor(class_taxlevel)))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(23,8))+
+  scale_color_manual(values = colors[c(4,24,7,43,39, 15, 34, 29,27,54)],limits = c( "Real data, supergroup", "Real data, taxogroup 1", "Real data, taxogroup 2", "Real data, taxogroup 3", "Real data, genus", "Simulation, supergroup", "Simulation, taxogroup 1", "Simulation, taxogroup 2", "Simulation, taxogroup 3", "Simulation, genus"))+geom_text(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf)+ 
+  #geom_text_repel(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf, min.segment.length = Inf)#
+  
+  labs(colour= "Data type, Taxonomic subset rank")+ylab("Correlation/proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+    theme(legend.position="bottom", legend.key.size = unit(0.2, "cm"))+ 
+  guides(colour = guide_legend(override.aes = list(size=6)))+
+  ggtitle(metrics_type)
+
+} else{
+  plot_fin <- ggplot(to_plot_sim, aes(x=tops, y=rho, colour = as.factor(md5sum_fakeid), fill = taxlevel)) + #geom_violin()+
+  #geom_point( size = 0.1, alpha = 0.6, aes(shape=class, colour = as.factor(class_taxlevel)))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+ facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(23,8))+
+  scale_color_manual(values = colors[c(4,24,7,43,39, 15, 34, 29,27,54)],limits = c( "Real data, supergroup", "Real data, taxogroup 1", "Real data, taxogroup 2", "Real data, taxogroup 3", "Real data, genus", "Simulation, supergroup", "Simulation, taxogroup 1", "Simulation, taxogroup 2", "Simulation, taxogroup 3", "Simulation, genus"))+geom_text(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf)+ 
+  #geom_text_repel(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf, min.segment.length = Inf)#
+  
+  labs(colour= "Data type, Taxonomic subset rank")+ylab("Correlation/proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+    theme(legend.position="none", legend.key.size = unit(0.2, "cm"))+ 
+  guides(colour = guide_legend(override.aes = list(size=6)))+
+  ggtitle(metrics_type)
+
+}
+
+
+ 
+  ggsave(paste0("sim_uniq_numbers_",metrics_type, ".pdf"),
+  plot = plot_fin,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 11,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+
+}
+```
+
+#Plot of different matchtype frequencies. To prove that metrics other than rho and cor basically suck
+
+```{r}
+
+sim_none <- fread("summary_sim_stats_none_all.tsv")
+sim_none$matchtype <- "None"
+
+sim_V9 <- fread("summary_sim_stats_onlyv9_all.tsv")
+sim_V9$matchtype <- "Only V9"
+
+sim_SMAG <- fread("summary_sim_stats_onlySMAG_all.tsv")
+sim_SMAG$matchtype <- "Only SMAG"
+
+sim_both <- fread("summary_sim_stats_all.tsv")
+sim_both$matchtype <- "Both"
+
+
+sim_all <- rbind(sim_none, sim_V9, sim_SMAG, sim_both)
+
+#limiting the taxlevels of simulations to that shown for real data
+#for ( org in levels(as.factor(sim_onlyv9_stats$organism))) {
+  #org <- "Thalassiosira" 
+ # ranks_shown <- levels(as.factor(to_plot_rho_shuffle1_to_merge$taxlevel[which(to_plot_rho_shuffle1_to_merge$organism == org)]))
+ 
+ # remove_list <- intersect(
+#  which(to_plot_metr_comp$organism == org),  which(to_plot_metr_comp$taxlevel %in% ranks_shown == FALSE)
+#  )
+  
+ # if (length(remove_list)>0) {
+ #     to_plot_metr_comp <- to_plot_metr_comp[-remove_list,]
+ # }
+#}
+
+#eliminating organisms with only 1 SMAG in the group
+#to_plot_metr_comp <- to_plot_metr_comp[-grep("Attheya|Cafeteria|Leptocylindrus|Mantoniella|Picochlorum|Synedropsis", to_plot_metr_comp$organism),]
+
+sim_all_rho <- sim_all[which(sim_all$metrics == "rho")]
+sim_all_rho$top <- as.numeric(sim_all_rho$top)
+sim_all_rho$rho <- as.numeric(sim_all_rho$rho)
+sim_all_rho$Mean <- as.numeric(sim_all_rho$Mean)
+sim_all_rho$Min <- as.numeric(sim_all_rho$Min)
+sim_all_rho$Max <- as.numeric(sim_all_rho$Max)
+sim_all_rho$Se <- as.numeric(sim_all_rho$Se)
+sim_all_rho$iteration_count <- as.numeric(sim_all_rho$iteration_count)
+
+ggplot(sim_all_rho, aes(x=top, y=Mean, colour = taxlevel, fill = taxlevel)) + #geom_violin()+
+  geom_point( alpha = 0.6, aes(size = iteration_count,shape=matchtype, colour=taxlevel))+geom_linerange(aes(ymin = Mean-Se, ymax = Mean+Se, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(23,20,2,11))+
+  scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")) + ggtitle("Rho")
+
+
+
+```
+
+#for all metrics 
+
+```{r}
+for ( metrics_type in diffmetr) {
+  
+  
+   sim_stats <- fread("summary_sim_stats_all.tsv")
+
+sim_none <- sim_stats[which(sim_stats$matchtype == "None."),]
+sim_none <- sim_none[which(sim_none$metrics %in% metrics_type),]
+sim_none$matchtype <- "None"
+sim_none$barcode <- paste0(sim_none$organism, sim_none$taxlevel, sim_none$Min, sim_none$Max, sim_none$Mean, sim_none$Se, sim_none$top, sim_none$metrics, sim_none$iteration_count)
+
+sim_V9 <- sim_stats[which(sim_stats$matchtype == "Only V9, not SMAG"),]
+sim_V9 <- sim_V9[which(sim_V9$metrics %in% metrics_type),]
+sim_V9$matchtype <- "Only V9, not SMAG"
+sim_V9$barcode <- paste0(sim_V9$organism, sim_V9$taxlevel, sim_V9$Min, sim_V9$Max, sim_V9$Mean, sim_V9$Se, sim_V9$top, sim_V9$metrics, sim_V9$iteration_count)
+
+sim_SMAG <- sim_stats[which(sim_stats$matchtype == "Only SMAG, not V9"),]
+sim_SMAG <- sim_SMAG[which(sim_SMAG$metrics %in% metrics_type),]
+sim_SMAG$matchtype <- "Only SMAG, not V9"
+sim_SMAG$barcode <- paste0(sim_SMAG$organism, sim_SMAG$taxlevel, sim_SMAG$Min, sim_SMAG$Max, sim_SMAG$Mean, sim_SMAG$Se, sim_SMAG$top, sim_SMAG$metrics, sim_SMAG$iteration_count)
+
+sim_both <- sim_stats[which(sim_stats$matchtype == "Both"),]
+sim_both <- sim_both[which(sim_both$metrics %in% metrics_type),]
+sim_both$matchtype <- "Both"
+sim_both$barcode <- paste0(sim_both$organism, sim_both$taxlevel, sim_both$Min, sim_both$Max, sim_both$Mean, sim_both$Se, sim_both$top, sim_both$metrics, sim_both$iteration_count)
+
+sim_all <- rbind(sim_none, sim_V9, sim_SMAG, sim_both)
+
+##########
+#Old version below
+#sim_none <- fread("summary_sim_stats_none_all.tsv")
+#sim_none$matchtype <- "None"
+#sim_none$barcode <- paste0(sim_none$organism, sim_none$taxlevel, sim_none$Min, sim_none$Max, sim_none$Mean, sim_none$Se, sim_none$top, sim_none$metrics, sim_none$iteration_count)
+
+#sim_V9 <- fread("summary_sim_stats_onlyv9_all.tsv")
+#sim_V9$matchtype <- "Only V9"
+#sim_V9$barcode <- paste0(sim_V9$organism, sim_V9$taxlevel, sim_V9$Min, sim_V9$Max, sim_V9$Mean, sim_V9$Se, sim_V9$top, sim_V9$metrics, sim_V9$iteration_count)
+
+#sim_SMAG <- fread("summary_sim_stats_onlySMAG_all.tsv")
+#sim_SMAG$matchtype <- "Only SMAG"
+#sim_SMAG$barcode <- paste0(sim_SMAG$organism, sim_SMAG$taxlevel, sim_SMAG$Min, sim_SMAG$Max, sim_SMAG$Mean, sim_SMAG$Se, sim_SMAG$top, sim_SMAG$metrics, sim_SMAG$iteration_count)
+
+#sim_both <- fread("summary_sim_stats_all.tsv")
+#sim_both$matchtype <- NA
+#sim_both$barcode <- paste0(sim_both$organism, sim_both$taxlevel, sim_both$Min, sim_both$Max, sim_both$Mean, sim_both$Se, sim_both$top, sim_both$metrics, sim_both$iteration_count)
+
+#sim_both$matchtype[which(sim_both$barcode %in% sim_SMAG$barcode)] <- "Only SMAG"
+#sim_both$matchtype[which(sim_both$barcode %in% sim_V9$barcode)] <- "Only V9"
+#sim_both$matchtype[which(sim_both$barcode %in% sim_none$barcode)] <- "None"
+#sim_both$matchtype[which(is.na(sim_both$matchtype ==TRUE))] <- "Both"
+
+
+
+#sim_all <- sim_both
+#sim_all <- rbind(sim_none, sim_V9, sim_SMAG, sim_both)
+
+#limiting the taxlevels of simulations to that shown for real data
+#for ( org in levels(as.factor(sim_onlyv9_stats$organism))) {
+  #org <- "Thalassiosira" 
+ # ranks_shown <- levels(as.factor(to_plot_rho_shuffle1_to_merge$taxlevel[which(to_plot_rho_shuffle1_to_merge$organism == org)]))
+ 
+ # remove_list <- intersect(
+#  which(to_plot_metr_comp$organism == org),  which(to_plot_metr_comp$taxlevel %in% ranks_shown == FALSE)
+#  )
+  
+ # if (length(remove_list)>0) {
+ #     to_plot_metr_comp <- to_plot_metr_comp[-remove_list,]
+ # }
+#}
+
+#eliminating organisms with only 1 SMAG in the group
+#to_plot_metr_comp <- to_plot_metr_comp[-grep("Attheya|Cafeteria|Leptocylindrus|Mantoniella|Picochlorum|Synedropsis", to_plot_metr_comp$organism),]
+#############
+sim_all_rho <- sim_all#[which(sim_all$metrics == metrics_type)]
+sim_all_rho$top <- as.numeric(sim_all_rho$top)
+sim_all_rho$rho <- as.numeric(sim_all_rho$rho)
+sim_all_rho$Mean <- as.numeric(sim_all_rho$Mean)
+sim_all_rho$Min <- as.numeric(sim_all_rho$Min)
+sim_all_rho$Max <- as.numeric(sim_all_rho$Max)
+sim_all_rho$Se <- as.numeric(sim_all_rho$Se)
+sim_all_rho$iteration_count <- as.numeric(sim_all_rho$iteration_count)
+  
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+sim_all_rho$organism_CB <- NA
+
+for (org_sim in unique(sim_all_rho$organism)) {
+  
+  sim_all_rho$organism_CB[which(sim_all_rho$organism == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+
+sim_all_rho$taxlevel[which(sim_all_rho$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+sim_all_rho$taxlevel[which(sim_all_rho$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+sim_all_rho$taxlevel[which(sim_all_rho$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+####################################
+
+
+
+if(metrics_type == "vlr")
+{
+ plot_fin <-  ggplot(sim_all_rho, aes(x=top, y=Mean)) + #geom_violin()+
+  geom_point( alpha = 0.6, aes(size = iteration_count,shape=matchtype, colour=taxlevel))+geom_linerange(aes(ymin = Mean-Se, ymax = Mean+Se, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(0,1,2,5),limits = c("None", "Both", "Only V9, not SMAG", "Only SMAG, not V9"))+
+  scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus")) + ggtitle(metrics_type)+
+   theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+ labs(size= "Number of matches in category", shape = "Category", colour = "Taxonomic rank of the subset")
+    theme(legend.position="bottom", legend.key.size = unit(0.2, "cm"))
+}
+
+else{
+  plot_fin <-  ggplot(sim_all_rho, aes(x=top, y=Mean)) + #geom_violin()+
+  geom_point( alpha = 0.6, aes(size = iteration_count,shape=matchtype, colour=taxlevel))+geom_linerange(aes(ymin = Mean-Se, ymax = Mean+Se, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(0,1,2,5),limits = c("None", "Both", "Only V9, not SMAG", "Only SMAG, not V9"))+
+  scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+theme(legend.position="none")+  
+    ggtitle(metrics_type)
+  
+}
+  
+   ggsave(paste0("sim_matchtype_counts_",metrics_type, ".pdf"),
+  plot = plot_fin,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 11,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+
+  
+}
+
+sim_all_rho
+
+```
+
+
+
+
+#Se accumulation plot
+
+```{r}
+sim_se_all <- fread("se_summary_sim_stats_all.tsv")
+
+sim_se_all_rho <-  sim_se_all[which(sim_se_all$metrics == "rho")]
+
+sim_se_all_rho$iteration_count <- as.numeric(sim_se_all_rho$iteration_count)
+sim_se_all_rho$Se <- as.numeric(sim_se_all_rho$Se)
+
+
+ ggplot(sim_se_all_rho, aes(x=iteration_count, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(matchtype))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = matchtype, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")) + ggtitle("Rho")
+  
+
+
+```
+
+
+
+#for all metrics
+
+```{r}
+
+diffmetr <- c("cor", "phi", "phs", "vlr","rho" )
+
+
+
+for ( metrics_type in diffmetr)
+{sim_se_all <- fread("se_summary_sim_stats_all.tsv")
+
+sim_se_all_rho <-  sim_se_all[which(sim_se_all$metrics == metrics_type)]
+
+
+sim_se_all_rho$iteration_count <- as.numeric(sim_se_all_rho$iteration_count)
+sim_se_all_rho$Se <- as.numeric(sim_se_all_rho$Se)
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+sim_se_all_rho$organism_CB <- NA
+
+for (org_sim in unique(sim_se_all_rho$organism)) {
+  
+  sim_se_all_rho$organism_CB[which(sim_se_all_rho$organism == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+
+sim_se_all_rho$taxlevel[which(sim_se_all_rho$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+sim_se_all_rho$taxlevel[which(sim_se_all_rho$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+sim_se_all_rho$taxlevel[which(sim_se_all_rho$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+####################################
+
+
+###as long as iteration count starts from the 25 but not from 1, we'll have to fix it for the plot
+
+sim_se_all_rho$iteration_count_num <- NA
+
+#c(1:length(unique(sim_se_all_rho$iteration_count)))
+numerical <- 1
+for (number in unique(sim_se_all_rho$iteration_count)) {
+  sim_se_all_rho$iteration_count_num[which(sim_se_all_rho$iteration_count == number)] <- numerical
+  numerical <- numerical+1
+}
+
+
+if (metrics_type == "vlr") {
+ plot_fin <- ggplot(sim_se_all_rho, aes(x=iteration_count_num, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(matchtype))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = matchtype, linetype=metrics, colour=taxlevel))+
+  
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus")) +
+   theme(legend.position="bottom")+  guides(fill = "none", linetype = "none", shape= "none")+
+   ggtitle(metrics_type)
+} else{
+  plot_fin <- ggplot(sim_se_all_rho, aes(x=iteration_count_num, y=Se, colour = taxlevel, fill = taxlevel ,group = as.factor(matchtype))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+#geom_line(size = 0.5, alpha = 0.6, aes(group = matchtype, linetype=metrics,  colour=taxlevel))+
+  theme(legend.position="none")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+ theme_classic()+#+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic rank of the subset")+ylab("Standard deviation")+
+  xlab("Number of iterations")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus")) + 
+    theme(legend.position="none")+  guides(fill = "none", linetype = "none", shape= "none")+
+    ggtitle(metrics_type)
+}
+ 
+ 
+  ggsave(paste0("sim_se_",metrics_type, ".pdf"),
+  plot = plot_fin,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 11,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+
+ 
+ 
+ }
+
+
+
+
+
+```
+
+
+
+
+#Example cases for main figure
+
+
+```{r}
+to_plot_rho_shuffle1 <- fread("to_plot_rho_shuffle1.tsv")
+
+
+to_plot_rho_shuffle1$org_md5sum_taxlvl <- paste0(to_plot_rho_shuffle1$organism,to_plot_rho_shuffle1$md5sum, to_plot_rho_shuffle1$taxlevel)
+
+to_plot_rho_shuffle1[which(duplicated(to_plot_rho_shuffle1$org_md5sum_taxlvl, fromLast=TRUE)==TRUE),]
+
+
+sim_onlyv9_stats <-sim_stats[which(sim_stats$matchtype == "Only V9, not SMAG"),]
+sim_onlyv9_stats <-sim_onlyv9_stats[,1:9]
+
+sim_onlyv9_stats <- sim_onlyv9_stats[which(sim_onlyv9_stats$metrics == "rho"),]
+
+colnames(sim_onlyv9_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth")
+
+sim_onlyv9_stats$orgtaxlvltop <- paste0(sim_onlyv9_stats$top, sim_onlyv9_stats$organism, sim_onlyv9_stats$taxlevel)
+
+#merging real data with simulations to have single dataset to plot
+#colnames(to_plot_rho_shuffle1)
+#colnames(sim_onlyv9_stats)
+
+sim_onlyv9_stats_to_merge <- sim_onlyv9_stats[,c(1,2,5,7,9)]
+colnames(sim_onlyv9_stats_to_merge) <- c("organism","taxlevel","rho", "tops", "iteration_count")
+
+sim_onlyv9_stats_to_merge$md5sum <- "Control simulation V9"
+sim_onlyv9_stats_to_merge$class <- "Simulation"
+
+
+to_plot_rho_shuffle1_to_merge <- to_plot_rho_shuffle1[,c(6,7,4,5,2)]
+colnames(to_plot_rho_shuffle1_to_merge) <- c("organism","taxlevel","rho", "tops", "md5sum")
+
+to_plot_rho_shuffle1_to_merge$iteration_count <- 1
+to_plot_rho_shuffle1_to_merge$class <- "Real data"
+
+
+
+
+#limiting the taxlevels of simulations to that shown for real data
+for ( org in levels(as.factor(sim_onlyv9_stats_to_merge$organism))) {
+  #org <- "Thalassiosira" 
+  ranks_shown <- levels(as.factor(to_plot_rho_shuffle1_to_merge$taxlevel[which(to_plot_rho_shuffle1_to_merge$organism == org)]))
+ 
+  remove_list <- intersect(
+  which(sim_onlyv9_stats_to_merge$organism == org),  which(sim_onlyv9_stats_to_merge$taxlevel %in% ranks_shown == FALSE)
+  )
+  
+  if (length(remove_list)>0) {
+      sim_onlyv9_stats_to_merge <- sim_onlyv9_stats_to_merge[-remove_list,]
+  }
+}
+#combining two plots together
+to_plot_sim <- rbind(to_plot_rho_shuffle1_to_merge,sim_onlyv9_stats_to_merge)
+
+#eliminating organisms with only 1 SMAG in the group
+to_plot_sim <- to_plot_sim[-grep("Attheya|Cafeteria|Leptocylindrus|Mantoniella|Picochlorum|Synedropsis", to_plot_sim$organism),]
+
+#adding a column to group the lines
+to_plot_sim$taxlevel_md5sum <- paste0(to_plot_sim$taxlevel, to_plot_sim$md5sum)
+
+
+#creating a fake variable that in theory allows distinguishing between 
+to_plot_sim$md5sum_fakeid <- NA
+
+to_plot_sim$orgtaxlevel <- paste0(to_plot_sim$organism, to_plot_sim$taxlevel)
+
+for (org in levels(as.factor(to_plot_sim$orgtaxlevel))) {
+
+  #org <- "Thalassiosirataxogroup_middle"
+  subs <- which(to_plot_sim$orgtaxlevel == org)
+  #if (length(subs)==0) {next}
+  
+  md5sum_list <- unique(to_plot_sim$md5sum[subs])
+  
+  for (fakecat in c(1:length(md5sum_list))) {
+    
+  print(intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat])))
+    
+    
+   to_plot_sim$md5sum_fakeid[intersect(subs, which(to_plot_sim$md5sum == md5sum_list[fakecat]))] <- fakecat
+  }
+  
+}
+  
+#eliminating bitch taxa with too many SMAGs... Dont actually know what to do with them
+#to_plot_sim <- to_plot_sim[-grep("MAST-4|New_Chrysochromulinaceae|New_Chrysophyceae|New_Choanozoa|New_Choreotrichida_01", to_plot_sim$organism),]
+
+to_plot_sim$class_taxlevel = paste0(to_plot_sim$class, ", ",to_plot_sim$taxlevel)
+
+to_plot_sim$tops <- as.numeric(to_plot_sim$tops)
+to_plot_sim$rho <- as.numeric(to_plot_sim$rho)
+
+to_plot_sim$class[which(to_plot_sim$rho >1)]
+
+
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+ org <- "chloroparvula"
+ scenario <- "III"
+ 
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),] 
+   if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  
+
+ 
+  chloroparvula <- to_plot_sim[which(to_plot_sim$organism == org), ]
+  highlight_chloroparvula_IIIb <- levels(as.factor(local_vocabulary_fig1$SMAG))
+  chloroparvula_hl <- chloroparvula
+  chloroparvula_hl$highlight <- NA
+  chloroparvula_hl$highlight[which(chloroparvula_hl$SMAG %in% highlight_chloroparvula_IIIb)] <- scenario
+  
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+
+
+  chloroparvula <- chloroparvula[which(chloroparvula$class == "Simulation"), ] 
+  to_plot_rho_shuffle1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism == org), ]
+  to_plot_rho_shuffle1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$md5sum %in% highlight_chloroparvula_IIIbV9),]
+  to_plot_rho_shuffle1$highlight <- NA
+  to_plot_rho_shuffle1$highlight[which(to_plot_rho_shuffle1$SMAG %in% highlight_chloroparvula_IIIb)] <- scenario
+  
+  to_plot_rho_shuffle1_m_chl <- to_plot_rho_shuffle1[,c(2, 4, 5, 6, 7, 18, 24)]
+  
+  chloroparvula$highlight <- NA
+  chloroparvula$iteration_count <- as.integer(chloroparvula$iteration_count)
+  
+  chloroparvula_m_chl <- chloroparvula[,c(1:6,12)]
+  to_plot_rho_shuffle1_m_chl$class <- "Real data"
+  chloroparvula_m_chl$class <- "Simulation"
+  
+  number_plott <- rbind(to_plot_rho_shuffle1_m_chl, chloroparvula_m_chl)
+  
+  number_plott$highlight[which(number_plott$md5sum == "Control simulation V9")] <- "Control"
+  number_plott$highlight[which(is.na(number_plott$highlight == TRUE))] <- "Other SMAGs matching same V9 OTUs"
+  number_plott$highlight[which(is.na(number_plott$highlight == scenario))] <- "Target SMAGs"
+  
+  number_plott$md5sum_fakeid <- NA
+  #number_plott$orgtaxlevel <- paste0(number_plott$organism, number_plott$taxlevel)
+
+  md5sum_list <- unique(number_plott$md5sum)
+  
+  for (fakecat in c(1:length(md5sum_list))) {
+    
+  print(which(number_plott$md5sum == md5sum_list[fakecat]))
+    
+    
+   number_plott$md5sum_fakeid[which(number_plott$md5sum == md5sum_list[fakecat])] <- fakecat
+  }
+  
+  number_plott <- number_plott[which(number_plott$taxlevel %in% unique(to_plot_rho_shuffle1_m_chl$taxlevel)),]
+  
+ 
+  number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+  
+  
+plot <- ggplot(number_plott, aes(x=tops, y=rho)) + #geom_violin()+
+  #geom_point( size = 0.1, alpha = 0.6, aes(shape=class, colour = as.factor(class_taxlevel)))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  #facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(21,24,23), limits = c("Target SMAGs", "Other SMAGs matching same V9 OTUs", "Simulation control"))+
+  scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus") )+
+  geom_point(aes(shape = as.factor(highlight), colour = as.factor(taxlevel), fill = as.factor(md5sum_fakeid)),size=5, stroke = 2)+
+  scale_fill_manual(values = colors[c(10,14,59,50,26)])+
+  #geom_text_repel(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf, min.segment.length = Inf)#
+  #scale_y_continuous(breaks = c(0.4,0.6,1))+
+  labs(colour= "Taxonomic rank of the subset", shape = "Group of matches")+ylab("Proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+ theme(legend.position = "bottom")+ #ggtitle("Rho")+
+  guides(fill = "none"#,  colour= "none", shape= "none", 
+         )
+
+
+#saving legend separately
+g_legend <- function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+mylegend <- g_legend(plot)
+library(grid)
+grid.draw(mylegend)
+
+```
+
+
+#For all cases for main figure
+
+```{r}
+
+to_plot_rho_shuffle11 <- fread("to_plot_rho_shuffle1.tsv")
+
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+
+ #org <- "chloroparvula"
+# scenario <- "III"
+
+ for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+    
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),] 
+   if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+
+ 
+  chloroparvula <- to_plot_sim[which(to_plot_sim$organism == org), ]
+  highlight_chloroparvula_IIIb <- levels(as.factor(local_vocabulary_fig1$SMAG))
+  chloroparvula_hl <- chloroparvula
+  #chloroparvula_hl$highlight <- NA
+  #chloroparvula_hl$highlight[which(chloroparvula_hl$SMAG %in% highlight_chloroparvula_IIIb)] <- scenario
+  
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+
+
+  chloroparvula <- chloroparvula[which(chloroparvula$class == "Simulation"), ] 
+  to_plot_rho_shuffle1 <- to_plot_rho_shuffle11[which(to_plot_rho_shuffle11$organism == org), ]
+  to_plot_rho_shuffle1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$md5sum %in% highlight_chloroparvula_IIIbV9),]
+  to_plot_rho_shuffle1$highlight <- NA
+  to_plot_rho_shuffle1$highlight[which(to_plot_rho_shuffle1$SMAG %in% highlight_chloroparvula_IIIb)] <- scenario
+  
+  to_plot_rho_shuffle1_m_chl <- to_plot_rho_shuffle1[,c(2, 4, 5, 6, 7, 18, 23)]
+  
+  chloroparvula$highlight <- NA
+  chloroparvula$iteration_count <- as.integer(chloroparvula$iteration_count)
+  
+  chloroparvula_m_chl <- chloroparvula[,c(1:6,12)]
+  to_plot_rho_shuffle1_m_chl$class <- "Real data"
+  chloroparvula_m_chl$class <- "Simulation"
+  
+  number_plott <- rbind(to_plot_rho_shuffle1_m_chl, chloroparvula_m_chl)
+  
+  number_plott$highlight[which(number_plott$md5sum == "Control simulation V9")] <- "Control"
+  number_plott$highlight[which(is.na(number_plott$highlight == TRUE))] <- "Other SMAGs matching same V9 OTUs"
+  number_plott$highlight[which(number_plott$highlight == scenario)] <- "Target SMAGs"
+  
+  number_plott$md5sum_fakeid <- NA
+  #number_plott$orgtaxlevel <- paste0(number_plott$organism, number_plott$taxlevel)
+
+  md5sum_list <- unique(number_plott$md5sum)
+  
+  for (fakecat in c(1:length(md5sum_list))) {
+    
+  print(which(number_plott$md5sum == md5sum_list[fakecat]))
+    
+    
+   number_plott$md5sum_fakeid[which(number_plott$md5sum == md5sum_list[fakecat])] <- fakecat
+  }
+  
+  number_plott <- number_plott[which(number_plott$taxlevel %in% unique(to_plot_rho_shuffle1_m_chl$taxlevel)),]
+  number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+number_plott$taxlevel[which(number_plott$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+  
+  
+  numplot_to_save <- ggplot(number_plott, aes(x=tops, y=rho)) + #geom_violin()+
+  #geom_point( size = 0.1, alpha = 0.6, aes(shape=class, colour = as.factor(class_taxlevel)))+#geom_line(size = 0.5, alpha = 0.6, aes(group = taxlevel_md5sum, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  #facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ scale_shape_manual(values = c(21,24,23), limits = c("Target SMAGs", "Other SMAGs matching same V9 OTUs", "Control"))+
+  scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus") )+
+  geom_point(aes(shape = as.factor(highlight), colour = as.factor(taxlevel), fill = as.factor(md5sum_fakeid)),size=3, stroke = 1.5)+
+  scale_fill_manual(values = colors[c(10,14,59,50,26)])+
+  #geom_text_repel(aes(label = as.factor(md5sum_fakeid), colour = as.factor(class_taxlevel)),size=2.5, max.overlaps = Inf, min.segment.length = Inf)#
+  #scale_y_continuous(breaks = c(0.4,0.6,1))+
+  labs(colour= "Taxogroup V9")+ylab("Proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 10),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+ #ggtitle("Rho")+
+  guides(colour = "none", fill = "none", shape= "none", )
+  
+  print(numplot_to_save)
+
+  ggsave(numplot_to_save, file=paste0( org, "_", scenario,  "_rho_sim_number_plot.svg"), width = 7.98, height = 6, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  }
+ }
+
+```
+

@@ -1,0 +1,1116 @@
+---
+title: "plotting_stuff_per_se"
+author: "Zavadska Daryna"
+date: "2023-01-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+
+##rho subsetting to taxlevels which are plotted
+
+```{r}
+
+#list of SMAGs with abundance = 0 to remove 
+
+
+
+df <- fread("summary_propr_calc_stats_all.tsv")
+vocabulary <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_inputs/final_taxa_ext_genus.csv")
+
+df <- df[which(df$metrics == "rho"),]
+
+df_no_super <- df[which(df$taxlevel != "supergroup"),]
+df_no_tax1 <- df_no_super[which(df_no_super$taxlevel != "taxogroup_1"),]
+  
+
+df_na_vocab <- data.frame()
+
+
+for (i in c(4:(ncol(vocabulary)))){
+print(i)
+df_low_taxlevel_rank <- c()
+df_low_taxlevel_group <- c()
+
+  
+vocabulary_dummy <- vocabulary %>% select(all_of(i))
+df_low_taxlevel_group <- c(df_low_taxlevel_group,vocabulary$taxa_SMAGs[which(is.na(vocabulary_dummy[,1]==TRUE))])
+df_low_taxlevel_rank <- c(df_low_taxlevel_rank, colnames(vocabulary)[i-1])
+
+taxlevel <- rep(df_low_taxlevel_rank,length(vocabulary$taxa_SMAGs[which(is.na(vocabulary_dummy[,1]==TRUE))]))
+data <- data.frame(matrix(nrow=length(taxlevel)))
+
+data$group <- df_low_taxlevel_group
+data$taxlevel <- taxlevel
+
+ df_na_vocab<- rbind.fill(df_na_vocab, data)
+
+}
+df_na_vocab
+
+
+group <- c()
+taxlevel <- c()
+for(i in unique(df_na_vocab$group)){
+  print(i)
+  print(df_na_vocab$taxlevel[which(df_na_vocab$group == i)][1])
+  taxlevel <- c(taxlevel, df_na_vocab$taxlevel[which(df_na_vocab$group == i)][1])
+  group <- c(group, i)
+}
+
+df_na_fin <- data.frame(matrix(nrow=length(taxlevel)))
+df_na_fin$group <- group
+df_na_fin$taxlevel <- taxlevel
+
+
+#subs_trunc <- data.frame()
+#for(i in c(1:length(df_na_fin$group))){
+#  subs <- df[which(df$organism == df_na_fin$group[i]),]
+#  subs_lvl1 <- subs[which(subs$taxlevel == df_na_fin$taxlevel[i]),]
+#  subs_trunc <- rbind.fill(subs_trunc,subs_lvl1)
+#}
+#check if it worked; should be output "taxogroup_2"
+#unique(subs_trunc$taxlevel[which(subs_trunc$organism=="New_MAST-4")])
+#subs_trunc
+
+subs_trunc_plus <- data.frame()
+
+ranks <- c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")
+
+for(i in c(1:length(df_na_fin$group))){
+
+  subs <- df[which(df$organism == df_na_fin$group[i]),]
+  subs_lvl1 <- subs[which(subs$taxlevel == df_na_fin$taxlevel[i]),]
+  
+  if (df_na_fin$taxlevel[i]!="supergroup") {
+      higher_rank <- print(ranks[which(ranks == df_na_fin$taxlevel[i])-1])
+  subs_lvl2 <- subs[which(subs$taxlevel == higher_rank),]
+  subs_trunc_plus <- rbind.fill(subs_trunc_plus,subs_lvl1,subs_lvl2)
+  } else
+  {subs_trunc_plus <- rbind.fill(subs_trunc_plus,subs_lvl1)}
+  
+
+}
+#check if it worked; should be output "taxogroup_2" AND "taxogroup_1"
+#unique(subs_trunc_plus$taxlevel[which(subs_trunc_plus$organism=="New_MAST-4")])
+
+
+df_lvl1 <- df[-which(df$organism %in% df_na_fin$group),]
+df_lvl2 <- df_lvl1[which(df_lvl1$taxlevel == "genus"),]
+df_lvl3 <- df_lvl1[which(df_lvl1$taxlevel == "taxogroup_middle"),]
+
+to_plot_rho <- rbind.fill(subs_trunc_plus,df_lvl2,df_lvl3)
+
+
+#removing SMAGs with total abundance == 0
+
+SMAGs_to_remove <- c( "Metagenome_centric_SAG_TOSAG23_9",  "Metagenome_centric_SAG_TOSAG39_1",  "Metagenome_centric_SAG_TOSAG39_6",  "Metagenome_centric_SAG_TOSAG41_1","Metagenome_centric_SAG_TOSAG41_10", "Metagenome_centric_SAG_TOSAG41_11",
+"Metagenome_centric_SAG_TOSAG41_8",  "Metagenome_centric_SAG_TOSAG47_5",  "Metagenome_centric_SAG_TOSAG47_7",  "Metagenome_centric_SAG_TOSAG48_3" )
+
+
+to_plot_rho <- to_plot_rho[-which(to_plot_rho$SMAG %in% SMAGs_to_remove),]
+
+#check if 0-abundance SMAGs were removed
+#which(to_plot_rho$SMAG %in% SMAGs_to_remove)
+```
+
+#rho raw plot
+
+```{r}
+
+  ggplot(to_plot_rho, aes(x=tops, y=rho,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(#shape=metrics, 
+    colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+scale_color_manual(values = colors[c(4,24,7,43,39)])+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+#scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) 
+
+#for the close-up view of several examples
+
+closeup <- c("Ostreococcus","Haptolina","Minutocellus","chloroparvula","New_Cyrtolophosidida_01","New_Haptophyta_01", "Pseudo-nitzschia")
+
+
+closeup_plot <- to_plot_rho[which(to_plot_rho$organism %in% closeup),]
+
+
+  ggplot(closeup_plot, aes(x=tops, y=rho,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(#shape=metrics, 
+    colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=7, scales="free_y")+scale_color_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+#scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) 
+
+
+```
+
+##Adding station intersect counts
+
+```{r}
+to_plot_rho$SMAG_md5sum <- paste0(to_plot_rho$SMAG, to_plot_rho$md5sum)
+
+
+stintr <- fread("station_intersect_counts.tsv", sep = ",")
+stintr$SMAG_md5sum <- paste0(stintr$SMAG, stintr$md5sum)
+
+to_plot_rho$stcount <- 0
+
+for (i in 1:nrow(to_plot_rho)) {
+  to_plot_rho$stcount[i] <- stintr$stcount[which(stintr$SMAG_md5sum == to_plot_rho$SMAG_md5sum[i])[1]]
+}
+
+to_plot_rho$stcount[which(to_plot_rho$stcount==0) ]<- NA
+
+
+  ggplot(to_plot_rho, aes(x=tops, y=rho,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(alpha = 0.6, aes(size = stcount, 
+    colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+scale_color_manual(values = colors[c(4,24,7,43,39)])+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+scale_size_continuous(limits = c(1,60))+#scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) 
+
+
+
+```
+
+
+
+##=Adding shuffling baseline
+
+```{r}
+#reading summary stats on shufflings
+summary_shuffle_stats <- fread("summary_shuffle_stats_cor.tsv")
+summary_shuffle_stats$orgtaxlvltop <- paste0(summary_shuffle_stats$top, summary_shuffle_stats$organism, summary_shuffle_stats$taxlevel)
+
+#creating column for merging shuffle with main stuff
+to_plot_rho$orgtaxlvltop <- paste0(to_plot_rho$tops, to_plot_rho$organism, to_plot_rho$taxlevel)
+
+to_plot_rho_shuffle <- merge(to_plot_rho, summary_shuffle_stats, by = "orgtaxlvltop")
+
+#removing duplicate columns and deleting ".x" in colnames
+to_plot_rho_shuffle1 <- to_plot_rho_shuffle[!duplicated(as.list(to_plot_rho_shuffle))]
+tempst <- c("orgtaxlvltop", "md5sum", "SMAG", "rho",  "tops", "organism", "taxlevel", "metrics", "taxogroup", "fSMAG", "taxlfSMAG","SMAG_md5sum", "stcount","Min", "Max", "Mean", "Se","iteration_count")
+colnames(to_plot_rho_shuffle1) <- tempst
+
+#colnames(to_plot_rho_shuffle1) <- c("orgtaxlvltop", "md5sum", "SMAG", "rho", "tops", "organism", "taxlevel", "ftop", "metrics", "taxogroup","fSMAG", "taxlfSMAG","Min","Max","Mean","Se","top") 
+#colnames(to_plot_rho_shuffle1) <-  str_replace(colnames(to_plot_rho_shuffle1), ".x", "")
+#colnames(to_plot_rho_shuffle1) <-  str_replace(colnames(to_plot_rho_shuffle1), ".x", "")
+
+
+##plot with ribbon for mean +/- se intervals of geom_ribbon
+main_plot_se <- 
+  ggplot(to_plot_rho_shuffle1, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39)])+scale_fill_manual(values = colors[c(4,24,7,43,39)])
+  
+main_plot_se 
+
+
+#for the close-up view of several examples
+
+closeup <- c("Prasinoderma","Attheya", "Thalassiosira")
+
+
+closeup_plot1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism %in% closeup),]
+
+  ggplot(closeup_plot1, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=7, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))+scale_fill_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))
+  
+  
+  closeup <- c("Ostreococcus","Haptolina","Minutocellus","chloroparvula","New_Cyrtolophosidida_01","New_Haptophyta_01", "Pseudo-nitzschia")
+
+
+closeup_plot1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism %in% closeup),]
+
+  ggplot(closeup_plot1, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=7, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))+scale_fill_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))
+  
+  
+  
+
+#saving the table with shuffling stats into the file
+fwrite(to_plot_rho_shuffle1, "to_plot_cor_shuffle1.tsv")
+
+```
+
+
+#SMAG Control checks
+
+```{r}
+
+unique(to_plot_rho_shuffle1$SMAG)
+SAGs <- to_plot_rho_shuffle1[grep("Metagenome_centric_SAG|TARA_ION_45_MAG_00147|TARA_AON_82_MAG_00189|TARA_AON_82_MAG_00012|TARA_AON_82_MAG_00118",to_plot_rho_shuffle1$SMAG),]
+
+SAGs$taxSAG <- paste0(SAGs$SMAG, SAGs$taxogroup)
+unique(SAGs$taxSAG)
+
+SAGs <- SAGs[which(SAGs$tops<=10),]
+
+SAG_match <- fread("blastSAGs.tsv")
+
+SAGs[SAGs$md5sum  %in%  SAG_match$subject_acc.ver,]
+
+SAG_match[SAG_match$SAG %in%  SAGs$SMAG,]
+
+
+
+
+SAGs <- to_plot_rho_shuffle1[grep("Metagenome_centric_SAG|TARA_ION_45_MAG_00147|TARA_AON_82_MAG_00189|TARA_AON_82_MAG_00012|TARA_AON_82_MAG_00118",to_plot_rho_shuffle1$SMAG),]
+
+SAGs$taxSAG <- paste0(SAGs$SMAG, SAGs$taxogroup)
+unique(SAGs$taxSAG)
+
+SAGs <- SAGs[ SAGs$SMAG %in% SAG_match$SAG,]
+unique(SAGs$SMAG)
+
+SAGs <- SAGs[which(SAGs$tops<=10),]
+
+
+#propr <- SAGs[SAGs$md5sum  %in%  SAG_match$subject_acc.ver,]
+propr <- SAGs
+
+
+for (i in c(1:nrow(propr))){
+  
+  propr$blast_barcode[i] <- as.character(SAG_match[which(SAG_match$SAG==propr$SMAG[i]),2][1])
+  propr$blast_barcode_Tara_pid[i] <- as.character(SAG_match[which(SAG_match$SAG==propr$SMAG[i]),3][1])
+  
+  if (is.na(propr$blast_barcode[i])) {
+     propr$if.matches[i] <- "No, unknown"
+     }
+  else if(propr$blast_barcode[i] == propr$md5sum[i]) {
+    propr$if.matches[i] <- "YES"
+  } 
+  else {propr$if.matches[i] <- "NO."}
+}
+
+propr_cor <- propr[which(propr$metrics == "rho"),]
+
+propr_cor[which(propr_cor$tops == 1),]
+
+unique(propr_cor$SMAG)  
+  
+  
+  #adding if.matches column to the main dataset and comparing the matches
+  
+propr$md5sum_SMAG <- paste0(propr$md5sum, propr$SMAG)
+to_plot_rho_shuffle1$md5sum_SMAG <- paste0(to_plot_rho_shuffle1$md5sum, to_plot_rho_shuffle1$SMAG)
+
+to_plot_rho_shuffle1$if.matches <- NA
+
+for (i in propr$md5sum_SMAG) {
+  to_plot_rho_shuffle1$if.matches[which(to_plot_rho_shuffle1$md5sum_SMAG==i)] <- propr$if.matches[which(propr$md5sum_SMAG==i)]
+}
+
+
+to_plot_rho_shuffle1$if.matches 
+to_plot_rho_shuffle1$if.matches_no_na <-to_plot_rho_shuffle1$if.matches 
+to_plot_rho_shuffle1$if.matches_no_na[which(is.na(to_plot_rho_shuffle1$if.matches_no_na==TRUE))] <- "Unknown"
+ 
+to_plot_rho_shuffle1$if.matches_text <-to_plot_rho_shuffle1$if.matches
+to_plot_rho_shuffle1$if.matches_text[which(to_plot_rho_shuffle1$if.matches_text=="YES")] <- "o"
+to_plot_rho_shuffle1$if.matches_text[which(to_plot_rho_shuffle1$if.matches_text=="NO.")] <- "*"
+
+
+
+
+
+
+main_plot_se <- 
+  ggplot(to_plot_rho_shuffle1, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)+
+   
+  geom_line(aes(x = tops, y =0.15), color = "red", linetype = "dotted")
+  
+
+
+#subset for SMAG scatterplots
+
+control_taxa_SMAGs <- c("Ostreococcus","Micromonas","Pycnococcus","Cafeteria","New_Chrysophyceae","New_Bacillariaceae_01","New_MALV-I_01", "Unidentified_Bacillariaceae", "MALV-I","Unidentified_Cercozoa", "MALV-II")
+
+
+control_plot <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism %in% control_taxa_SMAGs),]
+
+
+  ggplot(control_plot, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)
+
+
+#this dataframe is just created because it was required for scatterplots.Rmd to produce a scatterplots for SMAGs control;  now it is commented but kept in case dataframe has to be re-created
+#SMAGs_taxa <- to_plot_rho_shuffle1[,c(6,3)]
+#fwrite(SMAGs_taxa, "SMAGs_taxa.tsv")
+ fwrite(to_plot_rho_shuffle1, "to_plot_cor_shuffle1.tsv")
+```
+
+
+#Adding simulation baseline
+
+
+```{r}
+#old version with mock simulation files
+#sim_negall_stats <- fread("summary_sim_stats_negall_all.tsv")
+#sim_both_stats <- fread("summary_sim_stats_both_all.tsv")
+
+
+sim_stats <- fread("summary_sim_stats_all.tsv")
+
+sim_negall_stats <- sim_stats[which(sim_stats$matchtype == "None."),1:9]
+sim_negall_stats <- sim_negall_stats[which(sim_negall_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+  
+sim_both_stats <- sim_stats[which(sim_stats$matchtype == "Both"),1:9]
+sim_both_stats <- sim_both_stats[which(sim_both_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+
+sim_additional_stats <- sim_stats[which(sim_stats$matchtype == "Only SMAG, not V9"),1:9]
+sim_additional_stats <- sim_additional_stats[which(sim_additional_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+sim_additional_stats <- sim_additional_stats[which(sim_additional_stats$organism %in% c("Mantoniella", "Picochlorum", "Synedropsis", "Attheya", "Leptocylindrus", "Cafeteria")),]
+
+
+
+
+sim_both_stats$orgtaxlvltop <- paste0(sim_both_stats$top, sim_both_stats$organism, sim_both_stats$taxlevel)
+sim_negall_stats$orgtaxlvltop <- paste0(sim_negall_stats$top, sim_negall_stats$organism, sim_negall_stats$taxlevel)
+sim_additional_stats$orgtaxlvltop <- paste0(sim_additional_stats$top, sim_additional_stats$organism, sim_additional_stats$taxlevel)
+  
+colnames(sim_both_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_negall_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_negall_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_additional_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+
+
+sim_both_stats$control_type <- "positive"
+sim_negall_stats$control_type <- "negative"
+sim_additional_stats$control_type <- "negative"
+
+#sim_negall_stats[,duplicated((sim_negall_stats$orgtaxlvltop))]
+
+to_plot_rho_shuffle_sim_both <- merge(sim_both_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+to_plot_rho_shuffle_sim_negall <- merge(sim_negall_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+to_plot_rho_shuffle_sim_addition <- merge(sim_additional_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+
+to_plot_rho_shuffle_sim <- rbind(to_plot_rho_shuffle_sim_both,to_plot_rho_shuffle_sim_negall)
+to_plot_rho_shuffle_sim <- rbind(to_plot_rho_shuffle_sim,to_plot_rho_shuffle_sim_addition )
+
+
+
+#creating separate columns for positive controls
+to_plot_rho_shuffle_sim$positive_mean <- NA
+to_plot_rho_shuffle_sim$positive_mean[which(to_plot_rho_shuffle_sim$control_type=="positive")] <- to_plot_rho_shuffle_sim$Mean_simboth[which(to_plot_rho_shuffle_sim$control_type=="positive")]
+#checking if positives are top 1
+to_plot_rho_shuffle_sim$tops[which(to_plot_rho_shuffle_sim$control_type=="positive")]
+  
+to_plot_rho_shuffle_sim$negative_mean <- NA
+to_plot_rho_shuffle_sim$negative_mean[which(to_plot_rho_shuffle_sim$control_type=="negative")] <- to_plot_rho_shuffle_sim$Mean_simboth[which(to_plot_rho_shuffle_sim$control_type=="negative")]
+
+
+  ggplot(to_plot_rho_shuffle_sim, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+    geom_point(aes(x = tops, y =as.numeric(positive_mean)), colour="red", shape = 8)+geom_point(aes(x = tops, y =as.numeric(negative_mean)), colour="black", shape = 4)
+
+
+```
+
+
+#loop for all the metrics
+```{r}
+diffmetr <- c("vlr", "cor", "phi", "phs", "rho")
+
+  
+vocabulary <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_inputs/final_taxa_ext_genus.csv")
+
+
+
+
+for ( metrics_type in diffmetr) {
+  ###################CHUNK1######################3
+df <- fread("summary_propr_calc_stats_all.tsv")
+df <- df[which(df$metrics == metrics_type),]
+
+df_no_super <- df[which(df$taxlevel != "supergroup"),]
+df_no_tax1 <- df_no_super[which(df_no_super$taxlevel != "taxogroup_1"),]
+  
+
+df_na_vocab <- data.frame()
+
+
+for (i in c(4:(ncol(vocabulary)))){
+print(i)
+df_low_taxlevel_rank <- c()
+df_low_taxlevel_group <- c()
+
+  
+vocabulary_dummy <- vocabulary %>% select(all_of(i))
+df_low_taxlevel_group <- c(df_low_taxlevel_group,vocabulary$taxa_SMAGs[which(is.na(vocabulary_dummy[,1]==TRUE))])
+df_low_taxlevel_rank <- c(df_low_taxlevel_rank, colnames(vocabulary)[i-1])
+
+taxlevel <- rep(df_low_taxlevel_rank,length(vocabulary$taxa_SMAGs[which(is.na(vocabulary_dummy[,1]==TRUE))]))
+data <- data.frame(matrix(nrow=length(taxlevel)))
+
+data$group <- df_low_taxlevel_group
+data$taxlevel <- taxlevel
+
+ df_na_vocab<- rbind.fill(df_na_vocab, data)
+
+}
+df_na_vocab
+
+
+group <- c()
+taxlevel <- c()
+for(i in unique(df_na_vocab$group)){
+  print(i)
+  print(df_na_vocab$taxlevel[which(df_na_vocab$group == i)][1])
+  taxlevel <- c(taxlevel, df_na_vocab$taxlevel[which(df_na_vocab$group == i)][1])
+  group <- c(group, i)
+}
+
+df_na_fin <- data.frame(matrix(nrow=length(taxlevel)))
+df_na_fin$group <- group
+df_na_fin$taxlevel <- taxlevel
+
+
+#subs_trunc <- data.frame()
+#for(i in c(1:length(df_na_fin$group))){
+#  subs <- df[which(df$organism == df_na_fin$group[i]),]
+#  subs_lvl1 <- subs[which(subs$taxlevel == df_na_fin$taxlevel[i]),]
+#  subs_trunc <- rbind.fill(subs_trunc,subs_lvl1)
+#}
+#check if it worked; should be output "taxogroup_2"
+#unique(subs_trunc$taxlevel[which(subs_trunc$organism=="New_MAST-4")])
+#subs_trunc
+
+subs_trunc_plus <- data.frame()
+
+ranks <- c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")
+
+for(i in c(1:length(df_na_fin$group))){
+
+  subs <- df[which(df$organism == df_na_fin$group[i]),]
+  subs_lvl1 <- subs[which(subs$taxlevel == df_na_fin$taxlevel[i]),]
+  
+  if (df_na_fin$taxlevel[i]!="supergroup") {
+  higher_rank <- print(ranks[which(ranks == df_na_fin$taxlevel[i])-1])
+  subs_lvl2 <- subs[which(subs$taxlevel == higher_rank),]
+  subs_trunc_plus <- rbind.fill(subs_trunc_plus,subs_lvl1,subs_lvl2)
+  } else
+  {subs_trunc_plus <- rbind.fill(subs_trunc_plus,subs_lvl1)}
+  
+
+}
+#check if it worked; should be output "taxogroup_2" AND "taxogroup_1"
+#unique(subs_trunc_plus$taxlevel[which(subs_trunc_plus$organism=="New_MAST-4")])
+
+
+df_lvl1 <- df[-which(df$organism %in% df_na_fin$group),]
+df_lvl2 <- df_lvl1[which(df_lvl1$taxlevel == "genus"),]
+df_lvl3 <- df_lvl1[which(df_lvl1$taxlevel == "taxogroup_middle"),]
+
+to_plot_rho <- rbind.fill(subs_trunc_plus,df_lvl2,df_lvl3)
+
+
+#removing SMAGs with total abundance == 0
+
+SMAGs_to_remove <- c( "Metagenome_centric_SAG_TOSAG23_9",  "Metagenome_centric_SAG_TOSAG39_1",  "Metagenome_centric_SAG_TOSAG39_6",  "Metagenome_centric_SAG_TOSAG41_1","Metagenome_centric_SAG_TOSAG41_10", "Metagenome_centric_SAG_TOSAG41_11",
+"Metagenome_centric_SAG_TOSAG41_8",  "Metagenome_centric_SAG_TOSAG47_5",  "Metagenome_centric_SAG_TOSAG47_7",  "Metagenome_centric_SAG_TOSAG48_3" )
+
+
+to_plot_rho <- to_plot_rho[-which(to_plot_rho$SMAG %in% SMAGs_to_remove),]
+
+###########################CHUNK2  -- STATION INTERSECT COUNT
+  
+  to_plot_rho$SMAG_md5sum <- paste0(to_plot_rho$SMAG, to_plot_rho$md5sum)
+
+
+stintr <- fread("station_intersect_counts.tsv", sep = ",")
+stintr$SMAG_md5sum <- paste0(stintr$SMAG, stintr$md5sum)
+
+to_plot_rho$stcount <- 0
+
+for (i in 1:nrow(to_plot_rho)) {
+  to_plot_rho$stcount[i] <- stintr$stcount[which(stintr$SMAG_md5sum == to_plot_rho$SMAG_md5sum[i])[1]]
+}
+
+to_plot_rho$stcount[which(to_plot_rho$stcount==0) ]<- NA
+  
+ ###########################CHUNK3  -- SHUFFLING BASELINES
+
+
+#reading summary stats on shufflings
+summary_shuffle_stats <- fread(paste0("summary_shuffle_stats_",metrics_type, ".tsv"))
+summary_shuffle_stats$orgtaxlvltop <- paste0(summary_shuffle_stats$top, summary_shuffle_stats$organism, summary_shuffle_stats$taxlevel)
+
+#creating column for merging shuffle with main stuff
+to_plot_rho$orgtaxlvltop <- paste0(to_plot_rho$tops, to_plot_rho$organism, to_plot_rho$taxlevel)
+
+to_plot_rho_shuffle <- merge(to_plot_rho, summary_shuffle_stats, by = "orgtaxlvltop")
+
+#removing duplicate columns and deleting ".x" in colnames
+to_plot_rho_shuffle1 <- to_plot_rho_shuffle[!duplicated(as.list(to_plot_rho_shuffle))]
+tempst <- c("orgtaxlvltop", "md5sum", "SMAG", "rho",  "tops", "organism", "taxlevel", "metrics", "taxogroup", "fSMAG", "taxlfSMAG","SMAG_md5sum", "stcount","Min", "Max", "Mean", "Se","iteration_count")
+colnames(to_plot_rho_shuffle1) <- tempst
+
+#colnames(to_plot_rho_shuffle1) <- c("orgtaxlvltop", "md5sum", "SMAG", "rho", "tops", "organism", "taxlevel", "ftop", "metrics", "taxogroup","fSMAG", "taxlfSMAG","Min","Max","Mean","Se","top") 
+#colnames(to_plot_rho_shuffle1) <-  str_replace(colnames(to_plot_rho_shuffle1), ".x", "")
+#colnames(to_plot_rho_shuffle1) <-  str_replace(colnames(to_plot_rho_shuffle1), ".x", "")
+
+
+##plot with ribbon for mean +/- se intervals of geom_ribbon
+
+#main_plot_se 
+
+
+#for the close-up view of several examples
+
+#closeup <- c("Ostreococcus","Haptolina","Minutocellus","chloroparvula","New_Cyrtolophosidida_01","New_Haptophyta_01", "Pseudo-nitzschia")
+
+
+#closeup_plot1 <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism %in% closeup),]
+
+#  ggplot(closeup_plot1, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+#  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+#                                                                                                              colour=taxlevel))+
+#  theme(legend.position="bottom")+ 
+#  facet_wrap(~organism, ncol=7, scales="free_y")+  
+#  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+#  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+#  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+#  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+#  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+#  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))+scale_fill_manual(values = colors[c(4,7,43,39)],limits = c("supergroup", "taxogroup_2", "taxogroup_middle", "genus"))
+  
+
+
+ ###########################CHUNK4  -- SMAG CONTROLS
+   unique(to_plot_rho_shuffle1$SMAG)
+SAGs <- to_plot_rho_shuffle1[grep("Metagenome_centric_SAG|TARA_ION_45_MAG_00147|TARA_AON_82_MAG_00189|TARA_AON_82_MAG_00012|TARA_AON_82_MAG_00118",to_plot_rho_shuffle1$SMAG),]
+
+SAGs$taxSAG <- paste0(SAGs$SMAG, SAGs$taxogroup)
+unique(SAGs$taxSAG)
+
+SAGs <- SAGs[which(SAGs$tops<=10),]
+
+SAG_match <- fread("blastSAGs.tsv")
+
+SAGs[SAGs$md5sum  %in%  SAG_match$subject_acc.ver,]
+
+SAG_match[SAG_match$SAG %in%  SAGs$SMAG,]
+
+
+
+
+SAGs <- to_plot_rho_shuffle1[grep("Metagenome_centric_SAG|TARA_ION_45_MAG_00147|TARA_AON_82_MAG_00189|TARA_AON_82_MAG_00012|TARA_AON_82_MAG_00118",to_plot_rho_shuffle1$SMAG),]
+
+SAGs$taxSAG <- paste0(SAGs$SMAG, SAGs$taxogroup)
+unique(SAGs$taxSAG)
+
+SAGs <- SAGs[ SAGs$SMAG %in% SAG_match$SAG,]
+unique(SAGs$SMAG)
+
+SAGs <- SAGs[which(SAGs$tops<=10),]
+
+
+#propr <- SAGs[SAGs$md5sum  %in%  SAG_match$subject_acc.ver,]
+propr <- SAGs
+
+
+for (i in c(1:nrow(propr))){
+  
+  propr$blast_barcode[i] <- as.character(SAG_match[which(SAG_match$SAG==propr$SMAG[i]),2][1])
+  propr$blast_barcode_Tara_pid[i] <- as.character(SAG_match[which(SAG_match$SAG==propr$SMAG[i]),3][1])
+  
+  if (is.na(propr$blast_barcode[i])) {
+     propr$if.matches[i] <- "No, unknown"
+     }
+  else if(propr$blast_barcode[i] == propr$md5sum[i]) {
+    propr$if.matches[i] <- "YES"
+  } 
+  else {propr$if.matches[i] <- "NO."}
+}
+
+propr_cor <- propr[which(propr$metrics == "rho"),]
+
+propr_cor[which(propr_cor$tops == 1),]
+
+unique(propr_cor$SMAG)  
+  
+  
+  #adding if.matches column to the main dataset and comparing the matches
+  
+propr$md5sum_SMAG <- paste0(propr$md5sum, propr$SMAG)
+to_plot_rho_shuffle1$md5sum_SMAG <- paste0(to_plot_rho_shuffle1$md5sum, to_plot_rho_shuffle1$SMAG)
+
+to_plot_rho_shuffle1$if.matches <- NA
+
+for (i in propr$md5sum_SMAG) {
+  to_plot_rho_shuffle1$if.matches[which(to_plot_rho_shuffle1$md5sum_SMAG==i)] <- propr$if.matches[which(propr$md5sum_SMAG==i)]
+}
+
+
+to_plot_rho_shuffle1$if.matches 
+to_plot_rho_shuffle1$if.matches_no_na <-to_plot_rho_shuffle1$if.matches 
+to_plot_rho_shuffle1$if.matches_no_na[which(is.na(to_plot_rho_shuffle1$if.matches_no_na==TRUE))] <- "Unknown"
+ 
+to_plot_rho_shuffle1$if.matches_text <-to_plot_rho_shuffle1$if.matches
+to_plot_rho_shuffle1$if.matches_text[which(to_plot_rho_shuffle1$if.matches_text=="YES")] <- "o"
+to_plot_rho_shuffle1$if.matches_text[which(to_plot_rho_shuffle1$if.matches_text=="NO.")] <- "*"
+
+
+
+#subset for SMAG scatterplots
+
+control_taxa_SMAGs <- c("Ostreococcus","Micromonas","Pycnococcus","Cafeteria","New_Chrysophyceae","New_Bacillariaceae_01","New_MALV-I_01", "Unidentified_Bacillariaceae", "MALV-I","Unidentified_Cercozoa", "MALV-II")
+
+
+control_plot <- to_plot_rho_shuffle1[which(to_plot_rho_shuffle1$organism %in% control_taxa_SMAGs),]
+
+
+  ggplot(control_plot, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Supergroup V9")+ylab("Correlation/proportionality coefficient (log10)")+
+  xlab("Top-nth highest coefficient value (log10)")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)
+
+
+#this dataframe is just created because it was required for scatterplots.Rmd to produce a scatterplots for SMAGs control;  now it is commented but kept in case dataframe has to be re-created
+#SMAGs_taxa <- to_plot_rho_shuffle1[,c(6,3)]
+#fwrite(SMAGs_taxa, "SMAGs_taxa.tsv")
+ fwrite(to_plot_rho_shuffle1, paste0("to_plot_", metrics_type, "_shuffle1.tsv"))
+  
+ 
+  ###########################CHUNK5  -- SIMULATIONS
+
+ sim_stats <- fread("summary_sim_stats_all.tsv")
+
+sim_negall_stats <- sim_stats[which(sim_stats$matchtype == "None."),1:9]
+sim_negall_stats <- sim_negall_stats[which(sim_negall_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+  
+sim_both_stats <- sim_stats[which(sim_stats$matchtype == "Both"),1:9]
+sim_both_stats <- sim_both_stats[which(sim_both_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+
+sim_additional_stats <- sim_stats[which(sim_stats$matchtype == "Only SMAG, not V9"),1:9]
+sim_additional_stats <- sim_additional_stats[which(sim_additional_stats$metrics %in% unique(to_plot_rho_shuffle1$metrics)),1:9]
+sim_additional_stats <- sim_additional_stats[which(sim_additional_stats$organism %in% c("Mantoniella", "Picochlorum", "Synedropsis", "Attheya", "Leptocylindrus", "Cafeteria")),]
+
+
+
+
+sim_both_stats$orgtaxlvltop <- paste0(sim_both_stats$top, sim_both_stats$organism, sim_both_stats$taxlevel)
+sim_negall_stats$orgtaxlvltop <- paste0(sim_negall_stats$top, sim_negall_stats$organism, sim_negall_stats$taxlevel)
+sim_additional_stats$orgtaxlvltop <- paste0(sim_additional_stats$top, sim_additional_stats$organism, sim_additional_stats$taxlevel)
+  
+colnames(sim_both_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_negall_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_negall_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+colnames(sim_additional_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+
+
+sim_both_stats$control_type <- "positive"
+sim_negall_stats$control_type <- "negative"
+sim_additional_stats$control_type <- "negative"
+
+#sim_negall_stats[,duplicated((sim_negall_stats$orgtaxlvltop))]
+
+to_plot_rho_shuffle_sim_both <- merge(sim_both_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+to_plot_rho_shuffle_sim_negall <- merge(sim_negall_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+to_plot_rho_shuffle_sim_addition <- merge(sim_additional_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+
+to_plot_rho_shuffle_sim <- rbind(to_plot_rho_shuffle_sim_both,to_plot_rho_shuffle_sim_negall)
+to_plot_rho_shuffle_sim <- rbind(to_plot_rho_shuffle_sim,to_plot_rho_shuffle_sim_addition )
+
+#!!!!!!!!!!NOTE!!!!!!!!!!!!!
+#Some of the positive controls do appear in matchtype count plots, but they domt appear in calc pplots here. This is because the simalation positive control matches
+# are commonly recovered for genus level on the tops (like, top-10, top -5 etc.). However, in real datasets, on the level of genus those tops are simply absent due to the lower numbers of V9 OTUs in the subset) 
+
+#sim_both_stats[which(sim_both_stats$organism_simboth == "Aureococcus")]
+#unique(sim_both_stats$orgtaxlvltop) %in% unique(to_plot_rho_shuffle1$orgtaxlvltop)
+
+##########
+#Older version, for mock data, below 
+ #sim_negall_stats <- fread("summary_sim_stats_negall_all.tsv")
+#sim_both_stats <- fread("summary_sim_stats_both_all.tsv")
+#sim_both_stats$orgtaxlvltop <- paste0(sim_both_stats$top, sim_both_stats$organism, sim_both_stats$taxlevel)
+#sim_negall_stats$orgtaxlvltop <- paste0(sim_negall_stats$top, sim_negall_stats$organism, sim_negall_stats$taxlevel)
+  
+#colnames(sim_both_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+#colnames(sim_negall_stats) <- c("organism_simboth", "taxlevel_simboth", "Min_simboth", "Max_simboth", "Mean_simboth", "Se_simboth", "top_simboth", "metrics_simboth", "iteration_count_simboth", "orgtaxlvltop")
+#sim_both_stats$control_type <- "positive"
+#sim_negall_stats$control_type <- "negative"
+
+#to_plot_rho_shuffle_sim_both <- merge(sim_both_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+#to_plot_rho_shuffle_sim_negall <- merge(sim_negall_stats,to_plot_rho_shuffle1,  by = "orgtaxlvltop")
+
+#to_plot_rho_shuffle_sim <- rbind.fill(to_plot_rho_shuffle_sim_both,to_plot_rho_shuffle_sim_negall)
+#duplicated(colnames(to_plot_rho_shuffle_sim))
+#################
+
+
+
+#creating separate columns for positive controls
+to_plot_rho_shuffle_sim$positive_mean <- NA
+to_plot_rho_shuffle_sim$positive_mean[which(to_plot_rho_shuffle_sim$control_type=="positive")] <- to_plot_rho_shuffle_sim$Mean_simboth[which(to_plot_rho_shuffle_sim$control_type=="positive")]
+#checking if positives are top 1
+to_plot_rho_shuffle_sim$tops[which(to_plot_rho_shuffle_sim$control_type=="positive")]
+  
+to_plot_rho_shuffle_sim$negative_mean <- NA
+to_plot_rho_shuffle_sim$negative_mean[which(to_plot_rho_shuffle_sim$control_type=="negative")] <- to_plot_rho_shuffle_sim$Mean_simboth[which(to_plot_rho_shuffle_sim$control_type=="negative")]
+
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+to_plot_rho_shuffle_sim$organism_CB <- NA
+
+for (org_sim in unique(to_plot_rho_shuffle_sim$organism_simboth)) {
+  
+  to_plot_rho_shuffle_sim$organism_CB[which(to_plot_rho_shuffle_sim$organism_simboth == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+###################Plots_themselves###################### 
+
+if (metrics_type == "vlr") {
+ plot_fin <-  ggplot(to_plot_rho_shuffle_sim, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(fill= "Taxonomic subset rank")+ylab("Correlation/proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "bottom")+
+  scale_linetype_manual(values=c("twodash", "dotted")
+                        ) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+
+   scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"),
+                     guide = guide_legend(override.aes = list(linetype = c(0),
+                                                                  shape = c(NA),alpha = 1) ) )+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+    geom_point(aes(x = tops, y =as.numeric(positive_mean)), colour="red", shape = 8)+geom_point(aes(x = tops, y =as.numeric(negative_mean)), colour="black", shape = 4)+
+      
+      guides(colour = "none", linetype = "none", shape= "none")+ggtitle(metrics_type)
+
+
+} else
+  {  plot_fin <-  ggplot(to_plot_rho_shuffle_sim, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 2, alpha = 0.6, aes(shape=metrics, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, 
+                                                                                                              colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  facet_wrap(~organism_CB, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic subset rank")+ylab("Correlation/proportionality")+
+  xlab("Rank of pair")+ #theme(legend.position = "none")
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none")+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus", "NO.", "YES"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+
+  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+    geom_point(aes(x = tops, y =as.numeric(positive_mean)), colour="red", shape = 8)+geom_point(aes(x = tops, y =as.numeric(negative_mean)), colour="black", shape = 4)+ggtitle(metrics_type)
+
+}
+
+
+ 
+ 
+ 
+  ggsave(paste0(metrics_type, "_calc_plots.pdf"),
+  plot = plot_fin,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 11,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+}
+
+
+
+```
+
+
+
+#Example cases for main figure
+
+```{r}
+
+#scale_color_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus"))+
+#  geom_text(aes(label = if.matches_text, colour = as.factor(if.matches)), angle =180,size=5)+
+
+
+  chloroparvula <- to_plot_rho_shuffle_sim[which(to_plot_rho_shuffle_sim$organism == "chloroparvula"), ]
+  highlight_chloroparvula_IIIb <- "TARA_PSE_93_MAG_00236"
+  chloroparvula_hl <- chloroparvula
+  chloroparvula_hl$highlight <- NA
+  chloroparvula_hl$highlight[which(chloroparvula_hl$SMAG %in% highlight_chloroparvula_IIIb)] <- "III-b"
+  
+  
+    ggplot(chloroparvula_hl, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 4, alpha = 0.6, aes(shape=highlight, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+
+  #facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "Taxonomic subset rank")+ylab("Proportionality")+
+  xlab("Top-nth highest coefficient value (log10)")+ 
+      
+      #theme(legend.position = "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+
+      guides(fill = "none", linetype = "none", shape= "none", )+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+    geom_point(aes(x = tops, y =as.numeric(positive_mean)), colour="red", shape = 8)+geom_point(aes(x = tops, y =as.numeric(negative_mean)), colour="black", shape = 4)+ theme(legend.position="bottom")#+#ggtitle(metrics_type)+ 
+      geom_vline(xintercept =2.5, linetype="dotted", color = colors[47], size=1.5) 
+
+
+  
+```
+
+
+
+#For all cases for main figure
+
+
+```{r}
+#!!!!!!!!!!!!!!!!!!!!!!!NOTE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#MAKE SURE THE METRICS IN THE TABLE IS RHO
+#setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+#listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+#listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+#to_plot_rho_shuffle_sim
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+    
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),] 
+   if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  
+  ###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("Cedric_curated.csv")
+to_plot_rho_shuffle_sim$organism_CB <- NA
+
+for (org_sim in unique(to_plot_rho_shuffle_sim$organism_simboth)) {
+  
+  to_plot_rho_shuffle_sim$organism_CB[which(to_plot_rho_shuffle_sim$organism_simboth == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+to_plot_rho_shuffle_sim$taxlevel[which(to_plot_rho_shuffle_sim$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+to_plot_rho_shuffle_sim$taxlevel[which(to_plot_rho_shuffle_sim$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+to_plot_rho_shuffle_sim$taxlevel[which(to_plot_rho_shuffle_sim$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+###################Plots_themselves###################### 
+
+  
+  chloroparvula <- to_plot_rho_shuffle_sim[which(to_plot_rho_shuffle_sim$organism == org), ]
+  
+  highlight_chloroparvula_IIIb <- levels(as.factor(local_vocabulary_fig1$SMAG))
+  
+  chloroparvula_hl <- chloroparvula
+  chloroparvula_hl$highlight <- NA
+  chloroparvula_hl$highlight[which(chloroparvula_hl$SMAG %in% highlight_chloroparvula_IIIb)] <- scenario
+ 
+  #highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+  #highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+  #a bad attempt to automatically plot cutoffs. In theory, this works (also uncomment the lat line in the plot if you want to plot)
+  #highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  #cutoffs <- unique(chloroparvula_hl$tops[intersect(which(chloroparvula_hl$SMAG %in% highlight_chloroparvula_IIIb),  which(chloroparvula_hl$md5sum %in% highlight_chloroparvula_IIIbV9))])
+  #cutoffs <-  as.numeric (paste0(cutoffs, ".5"))
+  
+  rho_calc_plot_fig1 <-  ggplot(chloroparvula_hl, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 4, alpha = 0.6, aes(shape=highlight, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  #facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "V9 taxonomic subset")+ylab("Proportionality")+
+  xlab("Rank of pair")+ 
+      
+  theme(legend.position = "none")+
+  theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+
+      
+      guides(fill = "none", linetype = "none", shape= "none", )+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+    geom_point(aes(x = tops, y =as.numeric(positive_mean)), colour="red", shape = 8)+geom_point(aes(x = tops, y =as.numeric(negative_mean)), colour="black", shape = 4)#+#ggtitle(metrics_type)+ 
+      #(uncomment the line below for cutoffs)!
+    #geom_vline(xintercept =cutoffs, linetype="dotted", color = colors[47], size=1.5)
+
+  
+  
+  ggsave(rho_calc_plot_fig1, file=paste0( org, "_", scenario,  "_rho_calc_plot.svg"), width = 20, height = 15, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  
+  
+  
+  rho_calc_plot_fig1_no_simulation <-  ggplot(chloroparvula_hl, aes(x=tops, y=rho, colour = taxlevel, fill = taxlevel ,group = as.factor(taxlfSMAG))) + #geom_violin()+
+  geom_point(size = 4, alpha = 0.6, aes(shape=highlight, colour=taxlevel))+geom_line(size = 0.5, alpha = 0.6, aes(group = taxlfSMAG, linetype=metrics, colour=taxlevel))+
+  theme(legend.position="bottom")+ 
+  #facet_wrap(~organism, ncol=6, scales="free_y")+  
+  xlim(1,15)+ theme_classic()+scale_x_log10()+ #scale_y_log10() + 
+  labs(colour= "V9 taxonomic subset")+ylab("Proportionality")+
+  xlab("Rank of pair")+ 
+      
+  theme(legend.position = "none")+
+  theme(text = element_text(size = 10),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+
+  scale_linetype_manual(values=c("twodash", "dotted")) +
+  
+  geom_ribbon(aes( ymax = Mean + Se, ymin = Mean - Se), alpha = 0.1)+scale_color_manual(values = colors[c(4,24,7,43,39,10,30)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+scale_fill_manual(values = colors[c(4,24,7,43,39)],limits = c("supergroup", "taxogroup 1", "taxogroup 2", "taxogroup 3", "genus"))+
+      
+      guides(fill = "none", linetype = "none", shape= "none", )#+
+   
+  #geom_line(aes(x = tops, y =Mean_simboth), colour="red", linetype = "dotted")+
+   # geom_point(aes(x = tops, y =positive_mean), colour="red", shape = 8)+geom_point(aes(x = tops, y =negative_mean), colour="black", shape = 4)#+#ggtitle(metrics_type)+ 
+      #(uncomment the line below for cutoffs)!
+    #geom_vline(xintercept =cutoffs, linetype="dotted", color = colors[47], size=1.5)
+
+  
+  
+  ggsave(rho_calc_plot_fig1_no_simulation, file=paste0( org, "_", scenario,  "_rho_calc_plotno_simulation.svg"), width =7.98, height = 6, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  }
+}
+```
+
+
+
+
+
+
+

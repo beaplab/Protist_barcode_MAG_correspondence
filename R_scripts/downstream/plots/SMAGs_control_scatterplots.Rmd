@@ -1,0 +1,298 @@
+---
+title: "SMAGs_control_scatterplot"
+author: "Zavadska Daryna"
+date: "2023-01-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_SMAG_scatterplots/")
+```
+
+
+```{r, echo=FALSE , message=FALSE}
+##upload packages
+library(stringr)
+library(openxlsx)
+library(data.table)
+library(magrittr)
+library(GGally)
+library(propr)
+library(data.table)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+
+
+
+
+"MALV-II" 9395786c11b55fbb471016d074666f4603e5a50a was excluded from abundance calc because its raw total abundance is < 100
+"Unidentified_Cercozoa" 5c363b71e6bcd0528d5544d9a347864c33cf3af6 excluded for the same reason
+And
+d945a94b464aed8e5322f7fd0a04bd30f6355957 not present in V9 subset for taxogroup_2 for New_Chrysophyceae; its taxonomy is Eukaryota|Diaphoretickes|Sar|Stramenopiles|Gyrista|Ochrophyta|*|*|*|*|* 
+taxogroup_2 for New_Chrysophyceae is "Chrysophycea"; so the barcodes taxonomy level is not assigned precisely enough for taxogroup 2
+
+Current version for rho metrics, modify the loop as you wish to get all metrics
+
+```{r}
+
+#removing SMAGs with total abundance = 0
+SMAGs_to_remove <- c( "Metagenome_centric_SAG_TOSAG23_9",  "Metagenome_centric_SAG_TOSAG39_1",  "Metagenome_centric_SAG_TOSAG39_6",  "Metagenome_centric_SAG_TOSAG41_1","Metagenome_centric_SAG_TOSAG41_10", "Metagenome_centric_SAG_TOSAG41_11",
+"Metagenome_centric_SAG_TOSAG41_8",  "Metagenome_centric_SAG_TOSAG47_5",  "Metagenome_centric_SAG_TOSAG47_7",  "Metagenome_centric_SAG_TOSAG48_3" )
+
+
+
+SAG_match <- fread("blastSAGs.tsv")
+contr_SMAGs <- SAG_match$SAG
+
+df_na_fin <- fread("df_na_fin_for_scatterplots.tsv")
+
+ranks <- c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")
+#diffmetr <- c("phi","rho","phs","cor","vlr")
+diffmetr <- c("rho","cor")
+
+control_taxa_SMAGs <- c("Ostreococcus","Micromonas","Pycnococcus","Cafeteria","New_Chrysophyceae","New_Bacillariaceae_01","New_MALV-I_01", "Unidentified_Bacillariaceae", "MALV-I","Unidentified_Cercozoa", "MALV-II", "New_Bicosoecales_01")
+
+
+big_df <- data.frame()
+
+
+for (org in control_taxa_SMAGs) {
+    if (org %in% df_na_fin$group) {
+      r1 <- df_na_fin[which(df_na_fin$group == org),2]
+      r2<- ranks[which(ranks == as.character(r1[1]))-1]
+      ranks_trunc <-  c(r2,r1)
+    } else {ranks_trunc <- c("taxogroup_middle", "genus")}
+    
+  
+    for (taxlvl in ranks_trunc) {
+     #uncomment 2 lines below to test
+     #org <- "New_Bacillariaceae_01"
+     #taxlvl <- "taxogroup_2"
+      
+    #rho metrics taken because regardless of metrics type taxogroup subset remians the same. so any other metrics can be taken instead of rho, it doesnt really matter.
+    OstrV9_file <- list.files(pattern = paste0("cor", org, taxlvl,"data_V9_relabund_upd_ext_gen.tsv"))
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+    OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+    OstrSMAG_file <- list.files(pattern = paste0("cor", org, taxlvl,"data_SMAGs_upd_ext_gen.tsv"))
+    OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+    
+    refOstr <- intersect(which(colnames(OstrSMAG) %in% contr_SMAGs ==TRUE), which(colnames(OstrSMAG) %in% SMAGs_to_remove == FALSE))
+    
+    for (number in c(1:length(refOstr))) {
+      print(number)
+      #number <- 2
+      #if(length(refOstr)==1)
+    refOstr_one <- refOstr[number]
+      
+    
+    refV9name <- SAG_match$subject_acc.ver[which(SAG_match$SAG==colnames(OstrSMAG)[refOstr_one])]
+    
+    refV9 <- which(colnames(OstrV9) == paste0("X",refV9name))
+    
+    
+    refV9name_to_use <- paste0("X",refV9name)
+    #the if below is workaround to stupid R addin "X" at the beginning of numeric columns but not at the letters
+    if (length(refV9)==0) {
+      refV9 <- which(colnames(OstrV9) == refV9name)
+      refV9name_to_use <- refV9name
+    }
+    if (length(refV9)==0) {
+      print(paste0(refV9name_to_use, " not present in V9 subset for ", taxlvl, " for ", org))
+      next
+    }
+    refV9fake_list <- c()
+     
+    ##as fake v9 taking top-2 or top-3 barcodes from every metrics
+    for (metr in diffmetr) {
+      OstrV9_file_fakeref <- list.files(pattern =paste0(metr, org, taxlvl,"best_3_scores_relabund_upd_ext_gen.tsv"))
+      OstrV9_fakeref <- fread(OstrV9_file_fakeref,header = TRUE) %>% data.frame()
+      refV9fake_list <- c(refV9fake_list, OstrV9_fakeref$md5sum[intersect(which(OstrV9_fakeref$SMAG == colnames(OstrSMAG)[refOstr]),which(OstrV9_fakeref$md5sum!= refV9name))])
+      
+    }
+    
+   #refV9fake_list <-paste0("X",refV9fake_list)
+   refV9fake <- which(colnames(OstrV9) %in% refV9fake_list)#[-1]
+  #+workaround "Xs" before numbers
+   refV9fake <- c(refV9fake, which(colnames(OstrV9) %in% paste0("X",refV9fake_list)))
+  
+    station_intersect <- which( OstrV9$V1 %in% OstrSMAG$V1 ==TRUE)
+    station_intersect_SMAG <- which( OstrSMAG$V1 %in% OstrV9$V1  ==TRUE)
+    
+    Genome <- OstrSMAG[station_intersect_SMAG,  c(1,refOstr_one)]
+    ControlV9 = OstrV9[station_intersect,c(1,refV9)]
+    fakeV9 <- OstrV9[station_intersect,c(1,refV9fake)]
+
+    
+ ##whaat to do with this shit   
+    Ostr_relab <- merge(Genome,ControlV9,by="V1")
+    if (length(refV9fake)!=0) {
+      
+      
+      Ostr_relab <- merge(Ostr_relab,fakeV9,by="V1")
+    #Ostr_relab <- Ostr_relab[!duplicated(as.list(Ostr_relab))]
+      Ostr_relab <- Ostr_relab[order(Ostr_relab[,refV9name_to_use], decreasing = TRUE),] #ordering by V9 abundance; decreasing
+
+      Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+      length(Ostr_relab_m$V1) #check if melting was ok
+      length(unique(Ostr_relab_m$V1)) #check if melting was ok
+
+      Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+
+
+      #adding a column distinguishing SMAG from the from true V9 from fake V9 
+      Ostr_relab_m$class <- NA
+      Ostr_relab_m$class[which(Ostr_relab_m$variable %in% refV9fake_list)] <- "false-positive V9 OTU match"
+      Ostr_relab_m$class[which(Ostr_relab_m$variable %in% paste0("X",refV9fake_list))] <- "false-positive V9 OTU match"
+      Ostr_relab_m$class[which(Ostr_relab_m$variable %in% colnames(OstrSMAG)[refOstr_one])] <- "SMAG"
+      Ostr_relab_m$class[which(Ostr_relab_m$variable == refV9name_to_use)] <- "true-positive V9 OTU match"
+      Ostr_relab_m$class[which(Ostr_relab_m$variable == refV9name)] <- "true-positive V9 OTU match"
+      
+      
+Ostr_relab_m$taxlevel <- taxlvl
+Ostr_relab_m$SMAG <- org
+Ostr_relab_m$number <- number
+
+big_df <- rbind.fill(big_df, Ostr_relab_m)
+
+
+    } else{next}
+    
+    } 
+
+    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+    
+
+  }
+}
+
+#check if NAs were in class category anywhere; if yes - something went wrong
+#NA %in% big_df$class
+
+
+big_df$class_number <- paste0(big_df$class, big_df$number)
+big_df$linegroup <- paste0(big_df$class_number, big_df$variable, big_df$taxlevel)
+
+
+#with SMAGs better highlighted
+big_df$SMAGvaluebig <- NA
+SMAG_highlights <- intersect(which(big_df$value>0), which(big_df$class == "SMAG") )
+
+big_df$SMAGvaluebig[SMAG_highlights] <- big_df$value[SMAG_highlights]
+
+
+###################CHUNK ORDER 67###################### - this is the chunk to artificially rename taxa which were originally named by taxonomically unappealing names.
+
+CB <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/Cedric_curated.csv")
+big_df$organism_CB <- NA
+
+for (org_sim in unique(big_df$SMAG)) {
+  
+  big_df$organism_CB[which(big_df$SMAG == org_sim)] <- CB$`Taxonomic subset name`[which(CB$`SMAG taxonomy ""GENRE""` == org_sim)]
+}
+
+
+big_df$taxlevel[which(big_df$taxlevel == "taxogroup_middle")] <- "taxogroup 3"
+big_df$taxlevel[which(big_df$taxlevel == "taxogroup_2")] <- "taxogroup 2"
+big_df$taxlevel[which(big_df$taxlevel == "taxogroup_1")] <- "taxogroup 1"
+####################################
+
+plots <- list()
+XX <- 1
+
+for(organ in unique(big_df$organism_CB)){
+  
+  big_df_local <- big_df[which(big_df$organism_CB == organ),]
+  
+  plot_to_arrange <- ggplot(big_df_local, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 0.5, alpha = 0.3, aes(group = linegroup, colour = class, fill = class))+
+  facet_wrap(~taxlevel+number)+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,35,25)])+ scale_fill_manual(values = colors[c(4,35,25)])+
+  geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class)) + 
+  labs(colour= "Feature", fill = "Feature")+ylab("Feature relative abundance")+
+  xlab("Samples ranked by abundance of V9 OTU")+theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "none" )+ggtitle(organ)
+  
+  
+  if (organ == "unidentified Bicosoecida") {
+     plot_to_arrange <- ggplot(big_df_local, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 0.5, alpha = 0.3, aes(group = linegroup, colour = class, fill = class))+
+  facet_wrap(~taxlevel+number)+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,35,25)])+ scale_fill_manual(values = colors[c(4,35,25)])+
+  geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class)) + 
+  labs(colour= "Feature", fill = "Feature")+ylab("Feature relative abundance")+
+  xlab("Samples ranked by abundance of V9 OTU")+theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12), legend.position = "right")+ggtitle(organ)
+  
+  }
+  
+  plots[[XX]] =  plot_to_arrange #%>% insert_bottom(all2_local, height=.1)
+  print(plots[[XX]]) 
+  XX <- XX+1
+}
+  
+
+allplots <- ggarrange(plotlist=plots, ncol = 2, nrow=4)
+
+
+ggsave(paste0("FINSMAG_control_scatterplots.pdf"),
+  plot = allplots,
+  device = NULL,
+  path = "/home/dzavadska/Data/MAGs/REF2branch/plots/",
+  scale = 1,
+  width = 21,
+  height = 15.72,
+  units = c("in"),
+  dpi = 300,
+  limitsize = TRUE,
+  bg = NULL)
+
+
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+

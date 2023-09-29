@@ -1,0 +1,206 @@
+---
+title: "breakpoint_search"
+author: "Zavadska Daryna"
+date: "2023-03-12"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+#library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+library(stringr)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+
+```{r}
+vocabulary <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_inputs/final_taxa_ext_genus.csv")
+
+
+df <- fread(paste0("to_plot_rho_shuffle1.tsv"))
+
+df_summary <- data.frame("organism"=NA,
+                         "SMAG" = NA, 
+                         "taxlevel" = NA,
+                         "breakpoints" = NA,
+                         "rho_md5sum1" = NA,  "rho_md5sum2" = NA, "rho_md5sum3" = NA, "rho_md5sum4" = NA, "rho_md5sum5" = NA, "rho_md5sum6" = NA, "rho_md5sum7" = NA, "rho_md5sum8" = NA, "rho_md5sum9" = NA, "rho_md5sum10" = NA)
+
+
+for (org in levels(as.factor(vocabulary$taxa_SMAGs))) {
+  #org <- "Attheya"
+  #print(org)
+  
+  df_org <- df[which(df$organism == org),]
+  
+  
+  for (SMAG in levels(as.factor(df_org$SMAG))) {
+      #SMAG <- "TARA_ARC_108_MAG_00239"
+  for (taxgr in levels(as.factor(df_org$taxlevel))) {
+    #taxgr <- "taxogroup_middle"
+    
+      tosubs <- intersect(which(df_org$SMAG == SMAG), which(df_org$taxlevel == taxgr))
+      df_org_subs <- df_org[tosubs, ]
+      
+      top_x <- 1
+      breakpoint_tops <-c()
+      
+      if (length(levels(as.factor(df_org_subs$tops)))==1) {
+        breakpoint_V9 <- df_org_subs$md5sum
+         breakpoint_V9_to_add <- c(breakpoint_V9, rep(NA, 10-length(breakpoint_V9)))
+        breakpoint_tops <- "1 V9 OTU only"
+         new_row <- c(org, SMAG, taxgr, paste(breakpoint_tops,collapse=" "),breakpoint_V9_to_add)
+         
+      } else{
+      
+      for (i in c(2:length(levels(as.factor(df_org_subs$tops))))  ) {
+        latter <- df_org_subs$rho[which(df_org_subs$tops == i)]
+        former <- df_org_subs$rho[which(df_org_subs$tops == top_x)]
+        
+        #check if the number latter number is positive or negative
+        #if (latter => 0) {
+        #checking difference
+        if (as.numeric(former)-as.numeric(latter)>0.05) {
+          #filtering by shuffling baseline for top 1 of a given taxonomic subset
+          if (as.numeric(former)-(df_org_subs$Mean[which(df_org_subs$tops ==1)]+df_org_subs$Se[which(df_org_subs$tops ==1)])  >0.05  ) {
+            breakpoint_tops <-c(breakpoint_tops, top_x)
+          }
+        } else{breakpoint_tops <-c(breakpoint_tops, NA)  }
+          
+        
+        
+        top_x <- top_x+1
+      }
+     
+      if (length(na.omit(breakpoint_tops))>0) {
+      max_top <- max(na.omit(breakpoint_tops))
+      #min_top <- min(na.omit(breakpoint_tops))
+      breakpoint_V9 <- df_org_subs$md5sum[which(df_org_subs$top %in% c(1:max_top))]
+      }  
+        else{breakpoint_V9 <- NA}
+        
+     breakpoint_V9_to_add <- c(breakpoint_V9, rep(NA, 10-length(breakpoint_V9)))
+    
+      new_row <- c(org, SMAG, taxgr, paste(breakpoint_tops,collapse=" "),breakpoint_V9_to_add)
+      
+
+      df_summary[nrow(df_summary) + 1,] <- new_row
+      }
+  }
+  }
+  
+}
+
+
+```
+
+```{r}
+
+df <- fread(paste0("to_plot_cor_shuffle1.tsv"))
+
+df_summary_cor <- data.frame("organism"=NA,
+                         "SMAG" = NA, 
+                         "taxlevel" = NA,
+                         "breakpoints" = NA,
+                         "cor_md5sum1" = NA,  "cor_md5sum2" = NA, "cor_md5sum3" = NA, "cor_md5sum4" = NA, "cor_md5sum5" = NA, "cor_md5sum6" = NA, "cor_md5sum7" = NA, "cor_md5sum8" = NA, "cor_md5sum9" = NA, "cor_md5sum10" = NA)
+
+
+for (org in levels(as.factor(vocabulary$taxa_SMAGs))) {
+  #org <- "Micromonas"
+  #print(org)
+  
+  df_org <- df[which(df$organism == org),]
+  
+  for (SMAG in levels(as.factor(df_org$SMAG))) {
+      #SMAG <- "TARA_AON_82_MAG_00097"
+  for (taxgr in levels(as.factor(df_org$taxlevel))) {
+    #taxgr <- "taxogroup_middle"
+    
+      tosubs <- intersect(which(df_org$SMAG == SMAG), which(df_org$taxlevel == taxgr))
+      df_org_subs <- df_org[tosubs, ]
+      
+      top_x <- 1
+      breakpoint_tops <-c()
+      
+      if (length(levels(as.factor(df_org_subs$tops)))==1) {
+        breakpoint_V9 <- df_org_subs$md5sum
+         breakpoint_V9_to_add <- c(breakpoint_V9, rep(NA, 10-length(breakpoint_V9)))
+        breakpoint_tops <- "1 V9 OTU only"
+         new_row <- c(org, SMAG, taxgr, paste(breakpoint_tops,collapse=" "),breakpoint_V9_to_add)
+         
+      } else{
+      
+      for (i in c(2:length(levels(as.factor(df_org_subs$tops))))  ) {
+        latter <- df_org_subs$rho[which(df_org_subs$tops == i)]
+        former <- df_org_subs$rho[which(df_org_subs$tops == top_x)]
+        
+        if (as.numeric(former)-as.numeric(latter)>0.05) {
+          
+          #filtering by shuffling baseline for top 1 of a given taxonomic subset
+          if (as.numeric(former)-(df_org_subs$Mean[which(df_org_subs$tops ==1)]+df_org_subs$Se[which(df_org_subs$tops ==1)])  >0.05  ) {
+            breakpoint_tops <-c(breakpoint_tops, top_x)
+          }
+        } else{breakpoint_tops <-c(breakpoint_tops, NA)  }
+          
+        
+        top_x <- top_x+1
+      }
+     
+      if (length(na.omit(breakpoint_tops))>0) {
+      max_top <- max(na.omit(breakpoint_tops))
+      #min_top <- min(na.omit(breakpoint_tops))
+      breakpoint_V9 <- df_org_subs$md5sum[which(df_org_subs$top %in% c(1:max_top))]
+      }  else{breakpoint_V9 <- NA}
+     breakpoint_V9_to_add <- c(breakpoint_V9, rep(NA, 10-length(breakpoint_V9)))
+    
+      new_row <- c(org, SMAG, taxgr, paste(breakpoint_tops,collapse=" "),breakpoint_V9_to_add)
+      
+
+      df_summary_cor[nrow(df_summary_cor) + 1,] <- new_row
+      }
+  }
+  }
+  
+}
+df_summary_cor
+```
+
+
+```{r}
+summary_twometr <- cbind(df_summary_cor, df_summary)
+
+#check if first 3 columns match
+identical(df_summary_cor[,1:3],df_summary[,1:3])
+
+fwrite(summary_twometr, "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/breakpoint_summary_rho_cor.tsv")
+```
+

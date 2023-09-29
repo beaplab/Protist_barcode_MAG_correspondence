@@ -1,0 +1,703 @@
+---
+title: "Fig1_scatterplots"
+author: "Zavadska Daryna"
+date: "2023-04-06"
+output: html_document
+---
+##Example cases for main figure
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+```
+
+
+
+```{r, echo=FALSE , message=FALSE}
+##upload packages
+library(stringr)
+library(openxlsx)
+library(data.table)
+library(magrittr)
+library(GGally)
+library(propr)
+library(data.table)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+
+
+```
+
+
+
+#Loop for all plots
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),]
+    if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+
+    Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m <- na.omit(Ostr_relab_m)
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+      
+      
+  dotplot_to_save <-    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+      
+    
+  plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 1, alpha = 0.45, aes(group = as.factor(variable), colour = class, fill = class))+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Sample")+
+  ylab("Feature relative abundance")+theme(text = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 12))
+  
+
+  #ggsave(plot_to_save, file=paste0( org, "_", scenario,  "_scatterplot.svg"), width = 20, height = 15, units = "cm", dpi=300,
+         # path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  
+  
+}
+
+}
+
+
+
+
+```
+
+
+
+#Loop for all plots, separate SMAG each (because of ordering issue)
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+  local_vocabulary_fig1_1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),]
+    if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  
+  highlight_chloroparvula_IIIb_first <-levels(as.factor(local_vocabulary_fig1_1$SMAG))
+  
+  for (OneSMAG in highlight_chloroparvula_IIIb_first) {
+    
+    print(OneSMAG)
+    local_vocabulary_fig1 <-  local_vocabulary_fig1_1[which(local_vocabulary_fig1_1$SMAG == OneSMAG),]
+    highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+
+    Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m <- na.omit(Ostr_relab_m)
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+      
+      
+  dotplot_to_save <-    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+      
+    
+  plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 1, alpha = 0.45, aes(group = as.factor(variable), colour = class, fill = class))+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Sample")+
+  ylab("Feature relative abundance")+theme(text = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 12))
+  
+
+  ggsave(plot_to_save, file=paste0( org, "_", scenario, OneSMAG, "_scatterplot_oneSMAG.svg"), width = 20, height = 15, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  
+  
+}
+
+}
+
+}
+
+
+```
+
+
+
+#Loop for all plots, separate V9 each (still the ordering issue)
+
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+  local_vocabulary_fig1_1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),]
+    if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  
+  highlight_chloroparvula_IIIb_first <-levels(as.factor(local_vocabulary_fig1_1$md5sum))
+  
+  for (OneSMAG in highlight_chloroparvula_IIIb_first) {
+    
+    print(OneSMAG)
+    local_vocabulary_fig1 <-  local_vocabulary_fig1_1[which(local_vocabulary_fig1_1$md5sum == OneSMAG),]
+    highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+
+    Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m <- na.omit(Ostr_relab_m)
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+      
+      
+  dotplot_to_save <-    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+      
+    
+  plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 1, alpha = 0.45, aes(group = as.factor(variable), colour = class, fill = class))+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(4,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Sample")+
+  ylab("Feature relative abundance")+theme(text = element_text(size = 12),legend.text = element_text(size = 12), legend.title = element_text(size = 12))#+scale_x_log10()
+  
+  print(plot_to_save)
+
+  #ggsave(plot_to_save, file=paste0( org, "_", scenario, OneSMAG, "_scatterplot_oneSMAG.svg"), width = 20, height = 15, units = "cm", dpi=300,
+    #      path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  
+  
+}
+
+}
+
+}
+
+
+```
+
+
+
+
+
+#Loop for all plots, separate V9 each (ordering issue kind of fixed)
+!!!!!!!ACTUAL CODE FINALLY USED!!!!!!!!!!!!!!!!!
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/vocabulary_fig1_xmples.csv")
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  #org <- "chloroparvula"
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),]
+    if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+#station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+  station_intersect <- which( OstrV9$V1 %in% OstrSMAG_trunc$V1 ==TRUE)
+    station_intersect_SMAG <- which( OstrSMAG_trunc$V1 %in% OstrV9$V1  ==TRUE)
+    
+    Genome <- OstrSMAG_trunc[station_intersect_SMAG,]
+    #Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m <- na.omit(Ostr_relab_m)
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+    Ostr_relab_m$facet <- NA
+      
+    for (oneV9 in c(highlight_chloroparvula_IIIbV9)) {
+        SMAGs_in_group <- local_vocabulary_fig1$SMAG[which(local_vocabulary_fig1$md5sum == oneV9)]
+        V9_in_group <-  local_vocabulary_fig1$md5sum[which(local_vocabulary_fig1$SMAG  %in% SMAGs_in_group)]
+        if (length(SMAGs_in_group)==0) {next}
+        Ostr_relab_m$facet[which(Ostr_relab_m$variable %in% c(SMAGs_in_group, oneV9, paste0("X", oneV9), V9_in_group, paste0("X", V9_in_group)))] <- oneV9
+      }
+      
+        
+      
+  dotplot_to_save <-    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+ Ostr_relab_m$class_feature <- NA
+  Ostr_relab_m$class_feature[grep("SMAG", Ostr_relab_m$class)] <- "SMAG"    
+  Ostr_relab_m$class_feature[grep("V9", Ostr_relab_m$class)] <- "V9"
+ 
+  SMAGcounts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="SMAG" & Ostr_relab_m$facet == unique(Ostr_relab_m$facet)[1] ] ))
+  V9counts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="V9" & Ostr_relab_m$facet == unique(Ostr_relab_m$facet)[1] ] ))
+  
+  if (SMAGcounts == 1) { SLabel <- "SMAG"  } else { SLabel <- "SMAGs" }
+  if (V9counts == 1) { VLabel <- "V9 OTU"  } else { VLabel <- "V9 OTUs" }
+
+  plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = .5, alpha = 0.45, aes(group = as.factor(variable), colour = as.factor(variable), fill =as.factor(variable), linetype = class_feature) )+
+  theme_classic()+facet_wrap(~facet)+theme(strip.text.x.top = element_blank())+
+  scale_color_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Samples ranked by SMAG abundance ")+
+     #scale_x_continuous(breaks = c(100,250,500))+
+  theme(legend.position="none")+ 
+  ylab("Relative abundance")+theme(text = element_text(size = 10),legend.text = element_text(size = 5), legend.title = element_text(size = 5))+guides(colour = "none", fill = "none", shape= "none", )+
+  annotate("text", x = 400, y = 4, label = paste0(SMAGcounts, " ", SLabel, " ", '\n', V9counts, " ",VLabel), size = 3)  
+  
+print(plot_to_save)
+  ggsave(plot_to_save, file=paste0( org, "_", scenario,  "facet_wrap_scatterplot_Hopefully_last_edit.svg"), width = 7.98, height = 6, units = "cm", dpi=300,
+        path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+  
+  
+}
+
+}
+
+
+SMAGcounts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="SMAG"]))
+
+V9counts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="V9" & Ostr_relab_m$facet == unique(Ostr_relab_m$facet)[1]]))
+unique(Ostr_relab_m$facet)[1]
+
+ plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 1, alpha = 0.2, aes(group = as.factor(variable), colour = as.factor(variable), fill =as.factor(variable), linetype = class_feature))+
+  theme_classic()+facet_wrap(~facet)+theme(strip.text.x.top = element_blank())+
+  scale_color_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Samples ranked by V9 OTU abundance ")+
+     scale_x_continuous(breaks = c(100,250,500))+
+  theme(legend.position="bottom")+ 
+  ylab("Relative abundance")+theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+guides(colour = "none", fill = "none", shape= "none", linetype = guide_legend(override.aes =list(color = "black")) )+
+  annotate("text", x = 500, y = 6, label = paste0(SMAGcounts, " SMAGs ", V9counts, " V9 OTUs"), size = 5)  
+ 
+ print(plot_to_save)
+ 
+   ggsave(plot_to_save, file=paste0( "LEGENDLINETYPE_Hopefully_last_edit.svg"), width = 7.98, height = 6, units = "cm", dpi=300,
+        path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+ 
+#saving legend separately
+g_legend <- function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
+
+mylegend <- g_legend(plot_to_save)
+library(grid)
+grid.draw(mylegend)
+
+
+
+```
+
+# Exception for bitch Micromonas scenario I from the same plot
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/vocabulary_fig1_xmples.csv")
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+org <- "Micromonas"
+scenario <- "I"
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),]
+#    if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  highlight_chloroparvula_IIIb <-levels(as.factor(local_vocabulary_fig1$SMAG))
+  highlight_chloroparvula_IIIbV9 <- levels(as.factor(local_vocabulary_fig1$md5sum))
+  highlight_chloroparvula_IIIbV9_X <- paste0("X", levels(as.factor(local_vocabulary_fig1$md5sum)))
+  
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+#    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+#station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+  station_intersect <- which( OstrV9$V1 %in% OstrSMAG_trunc$V1 ==TRUE)
+    station_intersect_SMAG <- which( OstrSMAG_trunc$V1 %in% OstrV9$V1  ==TRUE)
+    
+    Genome <- OstrSMAG_trunc[station_intersect_SMAG,]
+    #Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m <- na.omit(Ostr_relab_m)
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+    Ostr_relab_m$facet <- NA
+      
+    for (oneV9 in c(highlight_chloroparvula_IIIbV9)) {
+        SMAGs_in_group <- local_vocabulary_fig1$SMAG[which(local_vocabulary_fig1$md5sum == oneV9)]
+        V9_in_group <-  local_vocabulary_fig1$md5sum[which(local_vocabulary_fig1$SMAG  %in% SMAGs_in_group)]
+        if (length(SMAGs_in_group)==0) {next}
+        Ostr_relab_m$facet[which(Ostr_relab_m$variable %in% c(SMAGs_in_group, oneV9, paste0("X", oneV9), V9_in_group, paste0("X", V9_in_group)))] <- oneV9
+      }
+      
+        
+      
+  dotplot_to_save <-    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+ Ostr_relab_m$class_feature <- NA
+  Ostr_relab_m$class_feature[grep("SMAG", Ostr_relab_m$class)] <- "SMAG"    
+  Ostr_relab_m$class_feature[grep("V9", Ostr_relab_m$class)] <- "V9"
+ 
+  SMAGcounts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="SMAG" & Ostr_relab_m$facet == unique(Ostr_relab_m$facet)[4] ] ))
+  V9counts <- length(unique(Ostr_relab_m$variable[Ostr_relab_m$class_feature=="V9" & Ostr_relab_m$facet == unique(Ostr_relab_m$facet)[4] ] ))
+  
+  if (SMAGcounts == 1) { SLabel <- "SMAG"  } else { SLabel <- "SMAGs" }
+  if (V9counts == 1) { VLabel <- "V9 OTU"  } else { VLabel <- "V9 OTUs" }
+
+  dat_text <- data.frame(
+  label = c("5 SMAGs \n 1 V9 OTU", "2 SMAGs \n 1 V9 OTU", "3 SMAGs \n 1 V9 OTU", "3 SMAGs \n 1 V9 OTU"),
+  facet = c("bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3", "be892bb6bb274afd7b8b1ac43b904e772e13fb0f", "ad17c99efd85e24991619ffe3230f95aeaa1c749", "f6d353cb19d24cb217eb92ab4ab6bfbf7c045a66"),
+  fakest = c(400, 400, 400, 400),
+  value = c(4, 4, 4, 4),
+  variable = c("SMAG", "SMAG", "SMAG", "SMAG"))
+  
+  dat_text$label <- as.character(dat_text$label)
+  
+  plot_to_save <-  ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = .5, alpha = 0.45, aes(group = as.factor(variable), colour = as.factor(variable), fill =as.factor(variable), linetype = class_feature) )+
+  theme_classic()+facet_wrap(~facet)+theme(strip.text.x.top = element_blank())+
+  scale_color_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+ scale_fill_manual(values = colors[c(57,40,24,13,27,9,6,7,33,34,35,24,25,23,36,37,38,39,40,59,60,20)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Samples ranked by SMAG abundance ")+
+     #scale_x_continuous(breaks = c(100,250,500))+
+  theme(legend.position="none")+ 
+  ylab("Relative abundance")+theme(text = element_text(size = 10),legend.text = element_text(size = 5), legend.title = element_text(size = 5))+guides(colour = "none", fill = "none", shape= "none", )
+  plot_to_save <-  plot_to_save+
+    geom_text(data = dat_text, mapping = aes(x = fakest, y = value, label = label) )
+ # annotate("text", x = 400, y = 4, label = paste0(SMAGcounts, " ", SLabel, " ", '\n', V9counts, " ",VLabel), size = 3)  
+  
+print(plot_to_save)
+  ggsave(plot_to_save, file=paste0( org, "_", scenario,  "facet_wrap_scatterplot_Hopefully_last_edit.svg"), width = 7.98, height = 6, units = "cm", dpi=300,
+        path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+  
+```
+
+
+
+
+
+#Local xmple
+
+```{r}
+setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+org <- "chloroparvula"
+ highlight_chloroparvula_IIIb <- "TARA_PSE_93_MAG_00236"
+highlight_chloroparvula_IIIbV9 <- c("74c4f15ca9aa7b936dbf91e31457b5fa1f5e9784", "756b537b6d951b323ed9a3334ed5c1d36973a4d9")
+highlight_chloroparvula_IIIbV9_X <- paste0("X", highlight_chloroparvula_IIIbV9)
+
+taxlvl <- "genus"
+listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+OstrV9_file <- listfiles[grep(org, listfiles)]
+
+    print(OstrV9_file)
+    if(length(OstrV9_file)==0){next}
+    
+OstrV9 <- fread(OstrV9_file,header = TRUE) %>% data.frame()
+
+OstrSMAG_file <- listfilesSMAG[grep(org, listfilesSMAG)]    
+OstrSMAG <- fread(OstrSMAG_file,header = TRUE) %>% data.frame()
+    
+OstrV9_trunc <- OstrV9[,c(1,which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9), which(colnames(OstrV9) %in% highlight_chloroparvula_IIIbV9_X))]
+OstrSMAG_trunc <- OstrSMAG[,c(1,which(colnames(OstrSMAG) %in% highlight_chloroparvula_IIIb))]     
+    
+station_intersect <- which(OstrSMAG_trunc$V1 %in% OstrV9_trunc$V1 ==TRUE)
+
+    Genome <- OstrSMAG_trunc[station_intersect,]
+    ControlV9 = OstrV9_trunc[station_intersect,]
+
+
+    Ostr_relab <- merge(Genome,ControlV9,by="V1") 
+    
+    Ostr_relab <- Ostr_relab[order(Ostr_relab[,highlight_chloroparvula_IIIb], decreasing = TRUE),]
+    Ostr_relab_m <-  melt(Ostr_relab,id.vars = "V1")
+    Ostr_relab_m$fakest <- c(rep(c(1:length(unique(Ostr_relab_m$V1))),length(Ostr_relab_m$V1)/length(unique(Ostr_relab_m$V1))))
+    
+
+    Ostr_relab_m$class <- NA
+    i<-1
+      for (SMAGb in colnames(OstrSMAG_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == SMAGb )] <- paste0("SMAG"," ", i)
+         i <- i+1
+      }
+    
+      i<-1
+      for (V9 in colnames(OstrV9_trunc)[-1]) {
+         Ostr_relab_m$class[which(Ostr_relab_m$variable == V9 )] <- paste0("V9"," ", i)
+         i <- i+1
+      }
+      
+      
+      
+      ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_point(size = 0.8, aes(shape = variable, colour = class))
+  
+      
+    
+    ggplot(Ostr_relab_m, aes(x=fakest, y=value,group = as.factor(variable))) + #geom_violin()+
+  geom_smooth(span = .1, size = 0.5, alpha = 0.3, aes(group = as.factor(variable), colour = class, fill = class))+
+  theme_classic()+
+  scale_color_manual(values = colors[c(4,6,7,33,34,35,24,25,23)])+ scale_fill_manual(values = colors[c(4,6,7,33,34,35,24,25,23)])+
+  #geom_point(size = 0.5, aes(x=fakest, y=SMAGvaluebig, colour = class_number)) + 
+  labs(colour= "Feature", fill = "Feature")+xlab("Sample")+
+  ylab("Feature relative abundance")+theme(text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))
+  
+```
+
+
+
+
+
+
+
+
+

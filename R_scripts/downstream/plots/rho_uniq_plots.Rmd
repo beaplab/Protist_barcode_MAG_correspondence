@@ -1,0 +1,1050 @@
+---
+title: "rho_calc_uniqueness"
+author: "Zavadska Daryna"
+date: "2023-02-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "/home/dzavadska/Data/MAGs/REF2branch/data_outputs/")
+```
+
+
+```{r, echo=FALSE , message=FALSE}
+library(data.table)
+library(ggplot2)
+library(reshape2)
+#library(tidyverse)
+library(dplyr)
+library(plyr)
+library(microshades)
+library(scales)
+library(ggbreak) 
+library(patchwork)
+library(ggpubr)
+library(gplots)
+library(rstackdeque)
+library(ggforce)
+library(aplot)
+library("gridExtra") 
+library(grid)
+library(cowplot)
+library(ggplotify)
+library(svglite)
+library(tidyr)
+library(stringr)
+library(ggtree)
+library("ggdendro")
+library(ggtreeExtra)
+library(treeio)
+library(ggtreeExtra)
+```
+
+
+
+```{r, echo=FALSE, message=FALSE}
+
+colors <-c(microshades_palette("micro_blue", lightest = FALSE), 
+           microshades_palette("micro_purple", lightest = FALSE), microshades_palette("micro_cvd_purple", lightest = FALSE), 
+           microshades_palette("micro_green", lightest = FALSE), 
+           microshades_palette("micro_cvd_green", lightest = FALSE),
+           microshades_palette("micro_orange", lightest = FALSE), 
+           microshades_palette("micro_brown", lightest = FALSE), 
+           microshades_palette("micro_cvd_turquoise", lightest = FALSE),
+           microshades_palette("micro_cvd_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_orange", lightest = FALSE),
+           microshades_palette("micro_gray", lightest = FALSE),
+           microshades_palette("micro_cvd_blue", lightest = FALSE))
+ 
+
+```
+
+
+
+
+
+```{r}
+
+df <- fread("to_plot_rho_shuffle1.tsv")
+
+taxogroups <- levels(as.factor(df$organism))
+diffmetr <- c("rho")
+ranks <- c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")
+
+
+big_df <- data.frame(df)
+
+
+levels(as.factor(big_df$taxlevel))
+
+
+#condition = m5sumtaxlvl, A1 = taxlvl, A2 = md5sum
+big_df$m5sumtaxlvlorg <- paste0(big_df$md5sum, big_df$taxlevel,"QUAR", big_df$organism)
+big_df$count <- NA
+b <- big_df[,c("m5sumtaxlvlorg", "count","md5sum")]
+
+bad <- gather(b, md5sum, count, key='anno', value='type')
+bad$fill <- NA
+
+bad$fill[which(bad$anno == "count")] <- bad$type[which(bad$anno == "count")]
+
+bad$organism <- sub(".*QUAR","",bad$m5sumtaxlvlorg)
+
+badp <- ggplot(bad, aes(m5sumtaxlvlorg, y=as.factor(anno), fill=as.factor(fill))) + geom_tile() + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), legend.position="none") +
+  xlab(NULL) + ylab(NULL) + facet_wrap(~organism, scales = "free") 
+
+
+
+#creating a column that store the number of SMAGs in which a given V9 occurs (non-uniquely)
+big_df$count <- NA
+bad$count <- NA
+for (i in levels(as.factor(big_df$m5sumtaxlvlorg))) {
+  count <- length(intersect(which(big_df$m5sumtaxlvlorg == i), which(big_df$top !="Not present")))
+  big_df$count[which(big_df$m5sumtaxlvlorg == i)] <- count
+  bad$count[which(big_df$m5sumtaxlvlorg == i)] <- count
+}
+
+
+
+
+for (taxlvl in ranks) {
+  for (org in taxogroups) {
+    for (metr in diffmetr) {
+      #uncomment following lines for test xmple
+       #org <- "New_Chrysophyceae"
+        #taxlvl <- "taxogroup_2"
+      #metr <- "rho"
+      
+      
+      data <- df[intersect(which(df$organism == org), intersect(which(df$taxlevel == taxlvl), which(df$metrics == metr))),c("md5sum", "SMAG", "tops", "taxlevel", "organism")]
+       #adding exception below, because df is subsetted to 2 lowest taxranks 
+      if (length(intersect(which(df$organism == org), intersect(which(df$taxlevel == taxlvl), which(df$metrics == metr)))) == 0 ) {next}
+       
+      molten <- data.frame("md5sum" = levels(as.factor(data$md5sum)),
+                           "top" = NA,
+                           "taxlevel" = NA,
+                           "organism" = NA, matrix(FALSE, ncol = length(data$SMAG)))
+      
+      colnames(molten) <- c("md5sum", "top", "taxlevel", "organism", data$SMAG)
+      SMAG_colnames <- c()
+      
+      for (id in c(1:nrow(data))) {
+       #id <- data$allvariable[SMAG]
+        
+       V9 <- which(molten$md5sum == data$md5sum[id])
+       
+       molten[V9, data$SMAG[id]] <- TRUE
+       #molten[V9,4+id] <- TRUE
+       
+       molten[V9,"top"] <- data$top[id]
+       molten[V9,"taxlevel"] <- data$taxlevel[id]
+       molten[V9,"organism"] <- data$organism[id]
+       #SMAG_colnames <- c(SMAG_colnames, data$SMAG[id])
+      }
+      
+      
+      #colnames(molten) <- c("md5sum", "top", "taxlevel", "organism", SMAG_colnames)
+      #duplicated(SMAG_colnames)
+      
+      molten <- molten[, !duplicated(colnames(molten))]
+
+      
+      melted_molten <- melt(molten, id.vars = "md5sum", measure.vars = c(data$SMAG))
+      melted_molten$top<- NA
+      
+      for (i in c(1:nrow(melted_molten))) {
+        
+        if (length(data$top[intersect(which(data$md5sum== melted_molten$md5sum[i]), which(data$SMAG== melted_molten$variable[i]))]) == 0) {
+           melted_molten$top[i] <- "Not present"
+        } 
+        else{melted_molten$top[i] <- data$top[intersect(which(data$md5sum== melted_molten$md5sum[i]), which(data$SMAG== melted_molten$variable[i]))]  }
+        
+      }
+      melted_molten$taxlvl<- data$taxlevel[1]
+      melted_molten$organism<- data$organism[1]
+
+      #ggplot(melted_molten, mapping = aes(x = variable,y = md5sum, fill = as.factor(top))) +
+      #geom_tile()+geom_point(aes(colour=top),size=1)+scale_fill_manual(values =colors)+scale_color_manual(values =colors)#geom_text(aes(label=top),size=1)
+      big_df <- rbind.fill(big_df, melted_molten)
+            
+      }
+
+    }
+
+  }
+#adding rho column to big_df
+#big_df$rho <-NA
+
+#for (i in 1:nrow(df)) {
+#  big_df$rho[ intersect(
+#    which(big_df$md5sum == df$md5sum[i]),
+#    intersect(which(big_df$variable == df$SMAG[i]), 
+#    intersect(which(big_df$top == df$top[i]),which(big_df$taxlevel == df$taxlevel[i])))
+#  )
+#  ] <- df$rho[i]
+#}
+
+###################################################################################################################################################3
+#condition = m5sumtaxlvl, A1 = taxlvl, A2 = md5sum
+big_df$m5sumtaxlvlorg <- paste0(big_df$md5sum, big_df$taxlevel,"QUAR", big_df$organism)
+
+#creating a column that store the number of SMAGs in which a given V9 occurs (non-uniquely)
+
+#big_df$count <- NA
+#bad$count <- NA
+#for (i in levels(as.factor(big_df$m5sumtaxlvlorg))) {
+#  count <- length(intersect(which(big_df$m5sumtaxlvlorg == i), which(big_df$top !="Not present")))
+#  big_df$count[which(big_df$m5sumtaxlvlorg == i)] <- count/10
+#  bad$count[which(big_df$m5sumtaxlvlorg == i)] <- count/10
+#}
+
+
+b <- big_df[,c("m5sumtaxlvlorg", "count","md5sum")]
+
+bad <- gather(b, md5sum, count, key='anno', value='type')
+bad$fill <- NA
+
+bad$fill[which(bad$anno == "count")] <- bad$type[which(bad$anno == "count")]
+
+bad$organism <- sub(".*QUAR","",bad$m5sumtaxlvlorg)
+
+###########################################################################
+###making a lot of separate plots for many taxa
+plots = list()
+XX <- 1
+
+for(org in taxogroups) {
+  
+      
+  if ( length(levels(as.factor(big_df$SMAG[which(big_df$organism == org)]))) == 1){next}
+
+local_big_df <- big_df[which(big_df$organism == org),]
+
+local_big_df$numtop <- as.numeric(local_big_df$tops)
+
+local_big_df$numtop[which(local_big_df$top == "Not present")] <- NA
+local_big_df$m5sumtaxlvlorgfill <- paste0(local_big_df$m5sumtaxlvlorg, local_big_df$count)
+
+#####
+#removing NA taxa which appear for some uncertain reason. Not sure on the origin of this bug
+local_big_df <- local_big_df[which(is.na(local_big_df$taxlevel) == FALSE),]
+
+all_local <- ggplot(local_big_df, aes(reorder(m5sumtaxlvlorg,count,FUN=mean),SMAG, fill=rho, alpha = 1/count)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        plot.background=element_blank(),
+    #remove plot border
+    panel.border=element_blank()) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+#alternative colouring c(38,37,19,23,22,26,27,46,11,31,56)  colors[c(24,23,39,19,4,58,9,14,49,29,56)]
+
+  
+local_bad <- bad[which(bad$organism == org),]
+#create height variable to remove shit "md5sum" mono-gray layer
+local_bad$myHeight <- NA
+local_bad$myHeight[which(local_bad$anno == "md5sum")] <- 0.05
+local_bad$myHeight[which(local_bad$anno == "count")] <- 0.95
+
+all2_local <-  ggplot(local_bad, aes(m5sumtaxlvlorg, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#######alternative where ordering by count
+local_bad$m5sumtaxlvlorgfill <- paste0(local_bad$m5sumtaxlvlorg, local_bad$fill)
+
+local_bad<- local_bad[which(local_bad$anno=="count"),]
+
+local_bad$md5sum <- str_replace(local_bad$m5sumtaxlvlorg, "supergroup.*|taxogroup_1.*|taxogroup_2.*|taxogroup_middle.*|genus.*","")
+
+local_bad$count <- local_bad$fill
+
+all2_local <- ggplot(local_bad, aes(md5sum, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        ) +
+  xlab("SMAGs shared for V9 OTU") + ylab(NULL)+ 
+  labs(fill= "SMAGs shared for V9 OTU")+
+  scale_fill_manual(values = colors[c(1:40)],na.translate=FALSE)
+
+#reorder(count,md5sum,FUN=mean)
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "proportionality/correlation coefficient")+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+  
+all_local %>% insert_bottom(all2_local, height=.1)
+
+  #if (org == "Aureococcus") {
+  #   plots[[org]] =  all_local %>% insert_bottom(all2_local, height=.1)
+ # } else{
+  #  plots[[org]] = all_local %>% insert_bottom(all2_local, height=.1) + plots[[org]]
+  #}
+    
+   plots[[XX]] =  all_local %>% insert_bottom(all2_local, height=.1)
+  print(plots[[XX]]) 
+  XX <- XX+1
+  
+}
+
+for (XX in c(1:length(plots))) {
+  ggsave(plots[[XX]], file=paste0("rho", XX, "_uniq_rho_plots",".svg"), width = 44.45, height = 27.78, units = "cm", dpi=300)
+}
+
+
+
+```
+
+
+#local xmple
+```{r}
+org <- "New_Chlorophyta_01"
+
+local_big_df <- big_df[which(big_df$organism == org),]
+
+local_big_df$numtop <- as.numeric(local_big_df$tops)
+
+local_big_df$numtop[which(local_big_df$top == "Not present")] <- NA
+local_big_df$m5sumtaxlvlorgfill <- paste0(local_big_df$m5sumtaxlvlorg, local_big_df$count)
+
+#####
+#removing NA taxa which appear for some uncertain reason. Not sure on the origin of this bug
+local_big_df <- local_big_df[which(is.na(local_big_df$taxlevel) == FALSE),]
+
+all_local <- ggplot(local_big_df, aes(reorder(m5sumtaxlvlorg,count,FUN=mean),SMAG, fill=log2(rho/numtop), alpha = 1/count)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        plot.background=element_blank(),
+    #remove plot border
+    panel.border=element_blank()) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+#alternative colouring c(38,37,19,23,22,26,27,46,11,31,56)  colors[c(24,23,39,19,4,58,9,14,49,29,56)]
+
+  
+local_bad <- bad[which(bad$organism == org),]
+#create height variable to remove shit "md5sum" mono-gray layer
+local_bad$myHeight <- NA
+local_bad$myHeight[which(local_bad$anno == "md5sum")] <- 0.05
+local_bad$myHeight[which(local_bad$anno == "count")] <- 0.95
+
+all2_local <-  ggplot(local_bad, aes(m5sumtaxlvlorg, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#######alternative where ordering by count
+local_bad$m5sumtaxlvlorgfill <- paste0(local_bad$m5sumtaxlvlorg, local_bad$fill)
+
+local_bad<- local_bad[which(local_bad$anno=="count"),]
+
+local_bad$md5sum <- str_replace(local_bad$m5sumtaxlvlorg, "supergroup.*|taxogroup_1.*|taxogroup_2.*|taxogroup_middle.*|genus.*","")
+
+local_bad$count <- local_bad$fill
+
+all2_local <- ggplot(local_bad, aes(md5sum, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#reorder(count,md5sum,FUN=mean)
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=log2(rho/numtop))) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank()#, axis.text.y = element_blank(),
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+  
+all_local %>% insert_bottom(all2_local, height=.1)
+
+```
+
+#for all metrics
+
+```{r}
+
+
+diffmetr <- c( "cor" , "phi", "phs", "vlr","rho")
+
+
+
+for ( metrics_type in diffmetr)
+
+{
+  df <- fread(paste0("to_plot_",metrics_type, "_shuffle1.tsv"))
+metr <- metrics_type
+
+taxogroups <- levels(as.factor(df$organism))
+#diffmetr <- c("rho")
+ranks <- c("supergroup", "taxogroup_1", "taxogroup_2", "taxogroup_middle", "genus")
+
+
+big_df <- data.frame(df)
+
+
+levels(as.factor(big_df$taxlevel))
+
+
+#condition = m5sumtaxlvl, A1 = taxlvl, A2 = md5sum
+big_df$m5sumtaxlvlorg <- paste0(big_df$md5sum, big_df$taxlevel,"QUAR", big_df$organism)
+big_df$count <- NA
+b <- big_df[,c("m5sumtaxlvlorg", "count","md5sum")]
+
+bad <- gather(b, md5sum, count, key='anno', value='type')
+bad$fill <- NA
+
+bad$fill[which(bad$anno == "count")] <- bad$type[which(bad$anno == "count")]
+
+bad$organism <- sub(".*QUAR","",bad$m5sumtaxlvlorg)
+
+badp <- ggplot(bad, aes(m5sumtaxlvlorg, y=as.factor(anno), fill=as.factor(fill))) + geom_tile() + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(), legend.position="none") +
+  xlab(NULL) + ylab(NULL) + facet_wrap(~organism, scales = "free") 
+
+
+
+#creating a column that store the number of SMAGs in which a given V9 occurs (non-uniquely)
+big_df$count <- NA
+bad$count <- NA
+for (i in levels(as.factor(big_df$m5sumtaxlvlorg))) {
+  count <- length(intersect(which(big_df$m5sumtaxlvlorg == i), which(big_df$top !="Not present")))
+  big_df$count[which(big_df$m5sumtaxlvlorg == i)] <- count
+  bad$count[which(big_df$m5sumtaxlvlorg == i)] <- count
+}
+
+
+
+
+for (taxlvl in ranks) {
+  for (org in taxogroups) {
+    #for (metr in diffmetr) {
+      #uncomment following lines for test xmple
+       #org <- "New_Chrysophyceae"
+        #taxlvl <- "taxogroup_2"
+      #metr <- "rho"
+      
+      
+      data <- df[intersect(which(df$organism == org), intersect(which(df$taxlevel == taxlvl), which(df$metrics == metr))),c("md5sum", "SMAG", "tops", "taxlevel", "organism")]
+       #adding exception below, because df is subsetted to 2 lowest taxranks 
+      if (length(intersect(which(df$organism == org), intersect(which(df$taxlevel == taxlvl), which(df$metrics == metr)))) == 0 ) {next}
+       
+      molten <- data.frame("md5sum" = levels(as.factor(data$md5sum)),
+                           "top" = NA,
+                           "taxlevel" = NA,
+                           "organism" = NA, matrix(FALSE, ncol = length(data$SMAG)))
+      
+      colnames(molten) <- c("md5sum", "top", "taxlevel", "organism", data$SMAG)
+      SMAG_colnames <- c()
+      
+      for (id in c(1:nrow(data))) {
+       #id <- data$allvariable[SMAG]
+        
+       V9 <- which(molten$md5sum == data$md5sum[id])
+       
+       molten[V9, data$SMAG[id]] <- TRUE
+       #molten[V9,4+id] <- TRUE
+       
+       molten[V9,"top"] <- data$top[id]
+       molten[V9,"taxlevel"] <- data$taxlevel[id]
+       molten[V9,"organism"] <- data$organism[id]
+       #SMAG_colnames <- c(SMAG_colnames, data$SMAG[id])
+      }
+      
+      
+      #colnames(molten) <- c("md5sum", "top", "taxlevel", "organism", SMAG_colnames)
+      #duplicated(SMAG_colnames)
+      
+      molten <- molten[, !duplicated(colnames(molten))]
+
+      
+      melted_molten <- melt(molten, id.vars = "md5sum", measure.vars = c(data$SMAG))
+      melted_molten$top<- NA
+      
+      for (i in c(1:nrow(melted_molten))) {
+        
+        if (length(data$top[intersect(which(data$md5sum== melted_molten$md5sum[i]), which(data$SMAG== melted_molten$variable[i]))]) == 0) {
+           melted_molten$top[i] <- "Not present"
+        } 
+        else{melted_molten$top[i] <- data$top[intersect(which(data$md5sum== melted_molten$md5sum[i]), which(data$SMAG== melted_molten$variable[i]))]  }
+        
+      }
+      melted_molten$taxlvl<- data$taxlevel[1]
+      melted_molten$organism<- data$organism[1]
+
+      #ggplot(melted_molten, mapping = aes(x = variable,y = md5sum, fill = as.factor(top))) +
+      #geom_tile()+geom_point(aes(colour=top),size=1)+scale_fill_manual(values =colors)+scale_color_manual(values =colors)#geom_text(aes(label=top),size=1)
+      big_df <- rbind.fill(big_df, melted_molten)
+            
+      }
+
+    }
+
+ # }
+#adding rho column to big_df
+#big_df$rho <-NA
+
+#for (i in 1:nrow(df)) {
+#  big_df$rho[ intersect(
+#    which(big_df$md5sum == df$md5sum[i]),
+#    intersect(which(big_df$variable == df$SMAG[i]), 
+#    intersect(which(big_df$top == df$top[i]),which(big_df$taxlevel == df$taxlevel[i])))
+#  )
+#  ] <- df$rho[i]
+#}
+
+###################################################################################################################################################3
+#condition = m5sumtaxlvl, A1 = taxlvl, A2 = md5sum
+big_df$m5sumtaxlvlorg <- paste0(big_df$md5sum, big_df$taxlevel,"QUAR", big_df$organism)
+
+#creating a column that store the number of SMAGs in which a given V9 occurs (non-uniquely)
+
+#big_df$count <- NA
+#bad$count <- NA
+#for (i in levels(as.factor(big_df$m5sumtaxlvlorg))) {
+#  count <- length(intersect(which(big_df$m5sumtaxlvlorg == i), which(big_df$top !="Not present")))
+#  big_df$count[which(big_df$m5sumtaxlvlorg == i)] <- count/10
+#  bad$count[which(big_df$m5sumtaxlvlorg == i)] <- count/10
+#}
+
+
+b <- big_df[,c("m5sumtaxlvlorg", "count","md5sum")]
+
+bad <- gather(b, md5sum, count, key='anno', value='type')
+bad$fill <- NA
+
+bad$fill[which(bad$anno == "count")] <- bad$type[which(bad$anno == "count")]
+
+bad$organism <- sub(".*QUAR","",bad$m5sumtaxlvlorg)
+
+###########################################################################
+###making a lot of separate plots for many taxa
+plots = list()
+XX <- 1
+
+for(org in taxogroups) {
+  
+      
+  if ( length(levels(as.factor(big_df$SMAG[which(big_df$organism == org)]))) == 1){next}
+
+local_big_df <- big_df[which(big_df$organism == org),]
+
+local_big_df$numtop <- as.numeric(local_big_df$tops)
+
+local_big_df$numtop[which(local_big_df$top == "Not present")] <- NA
+local_big_df$m5sumtaxlvlorgfill <- paste0(local_big_df$m5sumtaxlvlorg, local_big_df$count)
+
+#####
+#removing NA taxa which appear for some uncertain reason. Not sure on the origin of this bug
+local_big_df <- local_big_df[which(is.na(local_big_df$taxlevel) == FALSE),]
+
+all_local <- ggplot(local_big_df, aes(reorder(m5sumtaxlvlorg,count,FUN=mean),SMAG, fill=rho, alpha = 1/count)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        plot.background=element_blank(),
+    #remove plot border
+    panel.border=element_blank()) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+#alternative colouring c(38,37,19,23,22,26,27,46,11,31,56)  colors[c(24,23,39,19,4,58,9,14,49,29,56)]
+
+  
+local_bad <- bad[which(bad$organism == org),]
+#create height variable to remove shit "md5sum" mono-gray layer
+local_bad$myHeight <- NA
+local_bad$myHeight[which(local_bad$anno == "md5sum")] <- 0.05
+local_bad$myHeight[which(local_bad$anno == "count")] <- 0.95
+
+all2_local <-  ggplot(local_bad, aes(m5sumtaxlvlorg, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#######alternative where ordering by count
+local_bad$m5sumtaxlvlorgfill <- paste0(local_bad$m5sumtaxlvlorg, local_bad$fill)
+
+local_bad<- local_bad[which(local_bad$anno=="count"),]
+
+local_bad$md5sum <- str_replace(local_bad$m5sumtaxlvlorg, "supergroup.*|taxogroup_1.*|taxogroup_2.*|taxogroup_middle.*|genus.*","")
+
+local_bad$count <- local_bad$fill
+
+all2_local <- ggplot(local_bad, aes(md5sum, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        ) +
+  xlab("SMAGs shared for V9 OTU") + ylab(NULL)+ 
+  labs(fill= "SMAGs shared for V9 OTU")+
+  scale_fill_manual(values = colors[c(1:40)],na.translate=FALSE)
+
+#reorder(count,md5sum,FUN=mean)
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "proportionality/correlation coefficient")+
+  theme(axis.text.x = element_blank(), #axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+
+################
+
+tree <- read.newick("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/FIGURE_01/rnapol.tree")
+
+#short_tree <- as_tibble(tree)[which(as_tibble(tree)$label %in% unique(local_big_df$SMAG)),]
+
+nodes <- which(as_tibble(tree)$label %in% unique(local_big_df$SMAG))
+if (length(nodes) <=1 ) 
+  { 
+  
+  all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "proportionality/correlation coefficient")+
+  theme(axis.text.x = element_blank(), #axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+ plots[[XX]] =  all_local #%>% insert_bottom(all2_local, height=.1)
+#  print(plots[[XX]]) 
+  XX <- XX+1
+  
+ } 
+
+
+
+else{
+
+
+chiroptera <- groupOTU(tree, nodes)
+clade <- MRCA(chiroptera, nodes)
+x <- tree_subset(chiroptera, clade, levels_back = 0)
+
+to_drop <- x$tip.label[-which(x$tip.label %in% unique(local_big_df$SMAG))]
+x <- drop.tip(x, to_drop)
+
+p <- ggtree(x)
+####
+
+
+
+all_local <- p+  #geom_treescale(width=0.1, y = 0.7)+#geom_tiplab(align=TRUE, hjust = 0.1)+ 
+  geom_fruit(
+          data=local_big_df,
+          geom=geom_tile,
+          mapping=aes(x=md5sum, y=SMAG, fill=rho
+                      ), pwidth=10,
+          offset=0.5, axis.params =  list(axis = "y", text.size =2)
+      )  +
+#  
+  scale_x_discrete(expand=c(0,0)) +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  #labs(fill= "")
+  scale_fill_gradient(high = colors[40], low = colors[57])+
+   facet_wrap(~taxlevel, ncol=1)+
+  scale_colour_manual("z", values = c(colors[c(47,53)])) + 
+  scale_size_manual("z", values = c(0.5, 0.2))+
+#guides(size = "none", colour = "none", shape= "none" )  + theme(legend.position = "left", legend.key.height= unit(0.5, 'cm'),
+#        legend.key.width= unit(0.25, 'cm'))+scale_y_discrete() +
+#  theme(axis.text.x = element_blank(), axis.text.y = element_text(size = 5),
+ #       text = element_text(size = 10),legend.text = element_text(size = 5), legend.title = element_text(size = 5) 
+#    )  
+scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "proportionality/correlation coefficient")+
+  theme(axis.text.x = element_blank(), #axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))
+      
+
+
+#all_local %>% insert_bottom(all2_local, height=.1)
+
+  #if (org == "Aureococcus") {
+  #   plots[[org]] =  all_local %>% insert_bottom(all2_local, height=.1)
+ # } else{
+  #  plots[[org]] = all_local %>% insert_bottom(all2_local, height=.1) + plots[[org]]
+  #}
+    
+   plots[[XX]] =  all_local #%>% insert_bottom(all2_local, height=.1)
+#  print(plots[[XX]]) 
+  XX <- XX+1
+  
+}
+
+for (XX in c(1:length(plots))) {
+  ggsave(plots[[XX]], file=paste0( metrics_type, XX, "_uniq_rho_plots_named",".svg"), width = 60, height = 40.78, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/plots/uniq_plots/",metrics_type, "_uniq_plots/")
+         )
+}
+
+}
+  
+  
+}
+```
+
+
+
+
+#Example cases for main figure
+
+```{r}
+
+org <- "chloroparvula"
+
+local_big_df <- big_df[which(big_df$organism == org),]
+
+local_big_df$numtop <- as.numeric(local_big_df$tops)
+
+local_big_df$numtop[which(local_big_df$top == "Not present")] <- NA
+local_big_df$m5sumtaxlvlorgfill <- paste0(local_big_df$m5sumtaxlvlorg, local_big_df$count)
+
+#####
+#removing NA taxa which appear for some uncertain reason. Not sure on the origin of this bug
+local_big_df <- local_big_df[which(is.na(local_big_df$taxlevel) == FALSE),]
+
+all_local <- ggplot(local_big_df, aes(reorder(m5sumtaxlvlorg,count,FUN=mean),SMAG, fill=rho, alpha = 1/count)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        plot.background=element_blank(),
+    #remove plot border
+    panel.border=element_blank()) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+#alternative colouring c(38,37,19,23,22,26,27,46,11,31,56)  colors[c(24,23,39,19,4,58,9,14,49,29,56)]
+
+  
+local_bad <- bad[which(bad$organism == org),]
+#create height variable to remove shit "md5sum" mono-gray layer
+local_bad$myHeight <- NA
+local_bad$myHeight[which(local_bad$anno == "md5sum")] <- 0.05
+local_bad$myHeight[which(local_bad$anno == "count")] <- 0.95
+
+all2_local <-  ggplot(local_bad, aes(m5sumtaxlvlorg, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#######alternative where ordering by count
+local_bad$m5sumtaxlvlorgfill <- paste0(local_bad$m5sumtaxlvlorg, local_bad$fill)
+
+local_bad<- local_bad[which(local_bad$anno=="count"),]
+
+local_bad$md5sum <- str_replace(local_bad$m5sumtaxlvlorg, "supergroup.*|taxogroup_1.*|taxogroup_2.*|taxogroup_middle.*|genus.*","")
+
+local_bad$count <- local_bad$fill
+
+all2_local <- ggplot(local_bad, aes(md5sum, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        ) +
+  xlab("SMAGs shared for V9 OTU") + ylab(NULL)+ 
+  labs(fill= "SMAGs shared for V9 OTU")+
+  scale_fill_manual(values = colors[c(1:40)],na.translate=FALSE)
+
+#reorder(count,md5sum,FUN=mean)
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "Proportionality")+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ #ggtitle(org) +
+   facet_wrap(~taxlevel, ncol=1)
+
+
+highlight_chloroparvula_IIIb <- "TARA_PSE_93_MAG_00236"
+  local_big_df$highlight <- NA
+  local_big_df$highlight[which(local_big_df$SMAG %in% highlight_chloroparvula_IIIb)] <- "III-b"
+  
+
+
+all_local <- all_local + geom_tile(data = local_big_df,
+               aes(colour = factor(highlight), size = factor(highlight)
+                   ),
+               alpha = 0) + 
+  scale_colour_manual("z", values = c(colors[47], "white")) + 
+  scale_size_manual("z", values = c(1, 0))+
+      
+      guides(size = "none", colour = "none", shape= "none", )
+
+
+
+######dendrogram
+library(treeio)
+tree <- read.newick("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/FIGURE_01/rnapol.tree")
+
+#short_tree <- as_tibble(tree)[which(as_tibble(tree)$label %in% unique(local_big_df$SMAG)),]
+
+#short_tree <- groupClade(as_tibble(tree), which(as_tibble(tree)$label %in% unique(local_big_df$SMAG)))
+
+#short_tree <- as.treedata(short_tree)
+
+short_tree <-  tree_subset(tree, unique(local_big_df$SMAG)) 
+short_tree$tip.label[which(short_tree$tip.label %in% unique(local_big_df$SMAG) == FALSE)]
+to_drop <- short_tree$tip.label[which(short_tree$tip.label %in% unique(local_big_df$SMAG) == FALSE)]
+
+short_tree_1 <- drop.tip(short_tree, to_drop) 
+
+p <- ggplot(short_tree_1, aes(x, y)) + geom_tree() + theme_tree()
+
+p <-ggtree(short_tree_1)
+
+p+ geom_fruit(
+          data=local_big_df,
+          geom=geom_tile,
+          mapping=aes(y=SMAG, x=reorder(md5sum,count,FUN=mean), fill=rho, colour = factor(highlight), size = factor(highlight)),
+          #size=2.5,  
+          offset = 0.1,
+  pwidth = 10
+      )+scale_y_discrete(position="right", expand = c(0,0))+
+  scale_x_discrete(expand = c(0,0))+
+  facet_wrap(~taxlevel, ncol=1)+
+  scale_fill_gradient(high = colors[40], low = colors[57]) +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "Proportionality")+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12))+ 
+  
+  scale_colour_manual("z", values = c(colors[47], "white")) + 
+  scale_size_manual("z", values = c(1, 0))+
+      
+      guides(size = "none", colour = "none", shape= "none", )
+
+      
+
+ 
+
+
+
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "Proportionality")+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ #ggtitle(org) +
+   facet_wrap(~taxlevel, ncol=1)
+
+
+#otter_dendro <- as.dendrogram(hclust(d = dist(x = otter_matrix)))
+
+#all_local %>% insert_bottom(all2_local, height=.1)
+```
+
+
+
+#For all cases for main figure
+
+
+```{r}
+#setwd("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/")
+
+vocabulary_fig1 <- fread("vocabulary_fig1_xmples.csv")
+#listfiles <- list.files(pattern = "data_V9_relabund_upd_ext_gen.tsv")
+#listfilesSMAG <- list.files(pattern = "data_SMAGs_upd_ext_gen.tsv")
+
+
+for (org in levels(as.factor(vocabulary_fig1$GENRE))) {
+  print(org)
+  
+  for (scenario in levels(as.factor(vocabulary_fig1$Scenario_A))) {
+  print(scenario)
+    
+  local_vocabulary_fig1 <- vocabulary_fig1[intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)),] 
+   if(length(intersect(which(vocabulary_fig1$GENRE == org), which(vocabulary_fig1$Scenario_A == scenario)))==0){next}
+  highlight_chloroparvula_IIIb <- levels(as.factor(local_vocabulary_fig1$SMAG))
+  
+  
+local_big_df <- big_df[which(big_df$organism == org),]
+
+local_big_df$numtop <- as.numeric(local_big_df$tops)
+
+local_big_df$numtop[which(local_big_df$top == "Not present")] <- NA
+local_big_df$m5sumtaxlvlorgfill <- paste0(local_big_df$m5sumtaxlvlorg, local_big_df$count)
+
+#####
+#removing NA taxa which appear for some uncertain reason. Not sure on the origin of this bug
+local_big_df <- local_big_df[which(is.na(local_big_df$taxlevel) == FALSE),]
+
+all_local <- ggplot(local_big_df, aes(reorder(m5sumtaxlvlorg,count,FUN=mean),SMAG, fill=rho, alpha = 1/count)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab(NULL) + ylab(NULL)+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        plot.background=element_blank(),
+    #remove plot border
+    panel.border=element_blank()) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ ggtitle(org) + facet_wrap(~taxlevel, ncol=1)
+
+#alternative colouring c(38,37,19,23,22,26,27,46,11,31,56)  colors[c(24,23,39,19,4,58,9,14,49,29,56)]
+
+  
+local_bad <- bad[which(bad$organism == org),]
+#create height variable to remove shit "md5sum" mono-gray layer
+local_bad$myHeight <- NA
+local_bad$myHeight[which(local_bad$anno == "md5sum")] <- 0.05
+local_bad$myHeight[which(local_bad$anno == "count")] <- 0.95
+
+all2_local <-  ggplot(local_bad, aes(m5sumtaxlvlorg, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank()) +
+  xlab(NULL) + ylab(NULL)+
+  scale_fill_manual(values = colors[c(4,24,7,43,39)])
+
+#######alternative where ordering by count
+local_bad$m5sumtaxlvlorgfill <- paste0(local_bad$m5sumtaxlvlorg, local_bad$fill)
+
+local_bad<- local_bad[which(local_bad$anno=="count"),]
+
+local_bad$md5sum <- str_replace(local_bad$m5sumtaxlvlorg, "supergroup.*|taxogroup_1.*|taxogroup_2.*|taxogroup_middle.*|genus.*","")
+
+local_bad$count <- local_bad$fill
+
+all2_local <- ggplot(local_bad, aes(md5sum, y=anno, fill=as.factor(fill))) + geom_tile(aes(height = myHeight)) + 
+  scale_y_discrete(position="right") +
+  theme_minimal() + 
+  theme(axis.text.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        text = element_text(size = 10),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        ) +
+  xlab("SMAGs shared for V9 OTU") + ylab(NULL)+ 
+  labs(fill= "SMAGs shared for V9 OTU")+
+  scale_fill_manual(values = colors[c(1:40)],na.translate=FALSE)
+
+#reorder(count,md5sum,FUN=mean)
+
+all_local <- ggplot(local_big_df, aes(reorder(md5sum,count,FUN=mean), SMAG, fill=rho)) + 
+  geom_tile(colour="grey", size=0.25) + 
+  scale_y_discrete(position="right") +
+  theme_classic() + 
+  xlab("V9 OTU") + ylab("SMAG")+ 
+  labs(fill= "Proportionality")+
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank(),
+        text = element_text(size = 15),legend.text = element_text(size = 12), legend.title = element_text(size = 12)
+        #plot.background=element_blank(),
+    #remove plot border
+    #panel.border=element_blank()
+    ) +
+  scale_fill_gradient(high = colors[40], low = colors[57])+ #ggtitle(org) +
+   facet_wrap(~taxlevel, ncol=1)
+
+
+  local_big_df$highlight <- NA
+  local_big_df$highlight[which(local_big_df$SMAG %in% highlight_chloroparvula_IIIb)] <- "III-b"
+  
+
+
+all_local <- all_local + geom_tile(data = local_big_df,
+               aes(colour = factor(highlight), size = factor(highlight)
+                   ),
+               alpha = 0) + 
+  scale_colour_manual("z", values = c(colors[47], "white")) + 
+  scale_size_manual("z", values = c(1, 0))+
+      
+      guides(size = "none", colour = "none", shape= "none", )
+
+ ggsave(all_local, file=paste0( org, "_", scenario,  "_rho_uniq_plot.svg"), width = 7.98, height = 6, units = "cm", dpi=300,
+          path = paste0("/home/dzavadska/Data/MAGs/REF2branch/data_outputs/for_fig1_scatterplots/plots_fig1/"))
+
+}
+}
+  
+  
+```
+
+
+
