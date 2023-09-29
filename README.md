@@ -39,13 +39,11 @@ Online Supplement to "On the relationship between protist metabarcoding and prot
  + Candidate_pairs-for_R_script_scatterplot_corrected_Pairs_automated.csv - manually curated list of SMAG-V9 OTU pairs
  + Scenarios_auto_assigned_candidate_pairs.csv - manually curated list of SMAG-V9 OTU pairs with automatically assigned scenarios
  + blastSAGs.tsv - blast output for reference genome- SAG control
-
-### 	 plots : 
- + 	various plots, along with miscellaneous data for plot generation.
+ + plots.zip - various plots, along with miscellaneous data for plot generation.
 
 # manuscript_figs_n_code
-
-	svg of main figures, and source LaTeX data for the manuscript pdf
+ + svg of main figures
+ + source LaTeX data for the manuscript pdf
  
    
   
