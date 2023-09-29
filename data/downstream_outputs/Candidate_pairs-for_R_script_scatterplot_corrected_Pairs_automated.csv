@@ -1,0 +1,264 @@
+GENRE,SMAG,Status (Less Probable < Probable < More Probable < Yes),md5sum,Consistency_tax,Consistency_metrics,Uniqueness_in_tax,Uniqueness_out_tax,Comment
+Attheya,TARA_ARC_108_MAG_00239,Yes,2634cc2da492d273c4c5554abf5d747ef9fb3698,2,1,NA,0,3 V9 OTUs correspond to single SMAG
+Attheya,TARA_ARC_108_MAG_00239,Yes,18a7630046e33ef5234a508dff7726a848fb524d,2,1,NA,0,
+Attheya,TARA_ARC_108_MAG_00239,Yes,eafa02f025ca1da587b41faa1458b8ecc1afa917,2,1,NA,0,
+Aureococcus,TARA_AON_82_MAG_00274,Less probable,cd82ce5a6e59e15bcd23298807449eb97e456348,1,2,14,1,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_AON_82_MAG_00274,Less probable,0c1363aada7d27a290b661835464e61cb86d98e3,0,2,8,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_AOS_82_MAG_00129,Less probable,cd82ce5a6e59e15bcd23298807449eb97e456348,1,1,14,1,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_AOS_82_MAG_00129,Less probable,0c1363aada7d27a290b661835464e61cb86d98e3,0,2,8,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_IOS_50_MAG_00124,Probable,0968f14d2c73081415995dc74566d9769fe33a75,2,1,9,0,
+Aureococcus,TARA_IOS_50_MAG_00127,Less probable,cd82ce5a6e59e15bcd23298807449eb97e456348,1,2,14,1,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_IOS_50_MAG_00127,Less probable,0c1363aada7d27a290b661835464e61cb86d98e3,0,2,8,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_PON_109_MAG_00221,Less probable,cd82ce5a6e59e15bcd23298807449eb97e456348,1,2,14,1,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_PON_109_MAG_00221,Less probable,0c1363aada7d27a290b661835464e61cb86d98e3,0,2,8,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00274, TARA_AOS_82_MAG_00129, TARA_IOS_50_MAG_00127, TARA_PON_109_MAG_00221"
+Aureococcus,TARA_PSW_86_MAG_00257,Less probable,cd82ce5a6e59e15bcd23298807449eb97e456348,0,0,15,1,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Aureococcus,TARA_PSW_86_MAG_00257,Less probable,0968f14d2c73081415995dc74566d9769fe33a75,0,0,11,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_AON_82_MAG_00271,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_AOS_82_MAG_00186,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_ARC_108_MAG_00264,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_ION_45_MAG_00030,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_MED_95_MAG_00198,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_MED_95_MAG_00421,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_PSE_93_MAG_00017,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_PSE_93_MAG_00090,NA (More Probable),c876c4d5052b943d870996a2c62f570873fd11ba,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_AON_82_MAG_00271,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_AOS_82_MAG_00186,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_ARC_108_MAG_00264,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_ION_45_MAG_00030,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_MED_95_MAG_00198,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_MED_95_MAG_00421,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_PSE_93_MAG_00017,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Bathycoccus,TARA_PSE_93_MAG_00090,NA (Less Probable),6b514fe39086fcf7c1325878394f32b5e6141e95,NA,,,,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Chaetoceros,TARA_ARC_108_MAG_00116,Less probable,acad2a9cf29d20b11647ee21417ee89229629b5e,2,0,0,0,"V9 OTU is unique, but non-consistent; 1st/2nd (cor/rho) best match recovered in taxogroup_middle is Skeletonema"
+Chaetoceros,TARA_ARC_108_MAG_00267,More Probable,3d6fbbe3ec3e7886781732d9ab450b8356233e7e,4,4,4,1,same V9 OTU recovered in taxogroup_middle is Thallassiosira
+Chaetoceros,TARA_PSE_93_MAG_00253,Yes,8632a508a6aabd0af6d03348cca7fe94e98239e6,4,4,0,0,
+Chaetoceros,TARA_SOC_28_MAG_00060,Less probable,31f23434ec4e450de9c7bc07b78ed62d0c627aca,1,0,0,0,
+Chaetoceros,TARA_SOC_28_MAG_00060,Less probable,4665a3798d00a1938076186b3b4e746c4b8a7f5a,1,0,0,0,
+chloroparvula,TARA_ION_45_MAG_00156,Yes,273332e0dfd94d5a9802926879531af5996f637d,4,4,0,0,
+chloroparvula,TARA_IOS_50_MAG_00114,More Probable,a443c3ba567e7566266d4d50867ae2969801d3a4,4,4,11,0,Pattern for this SMAG is very similar to TARA_PON_109_MAG_00222
+chloroparvula,TARA_IOS_50_MAG_00114,Less Probable,574f35e3c48a314e8f8594c2c62d0f0c69266ae6,3,3,10,0,"Is second possible breakpoint for this SMAG, and first possible breakpoint for TARA_PON_109_MAG_00222"
+chloroparvula,TARA_PON_109_MAG_00222,More Probable,a443c3ba567e7566266d4d50867ae2969801d3a4,4,4,11,0,Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00114
+chloroparvula,TARA_PON_109_MAG_00222,More Probable,574f35e3c48a314e8f8594c2c62d0f0c69266ae6,4,4,10,0,"Is second possible breakpoint for this SMAG, and first possible breakpoint for TARA_PON_109_MAG_00222"
+chloroparvula,TARA_PON_109_MAG_00226,More Probable,b47fee330f5133d401e80001351c89c30502d932,4,4,4,0,
+chloroparvula,TARA_PSE_93_MAG_00220,More Probable,c605ef53efb8ebba4670b2121fb6d43e69217b7e,4,4,11,1,"Pattern for this SMAG is very similar to TARA_PON_109_MAG_00300 same V9 OTU recovered in taxogroup_middle is Chloropicon, but inconsistently"
+chloroparvula,TARA_AON_82_MAG_00300,More Probable,c605ef53efb8ebba4670b2121fb6d43e69217b7e,4,4,11,1,"Pattern for this SMAG is very similar to TARA_PON_109_MAG_00220 same V9 OTU recovered in taxogroup_middle is Chloropicon, but inconsistently"
+chloroparvula,TARA_PSE_93_MAG_00236,More Probable,74c4f15ca9aa7b936dbf91e31457b5fa1f5e9784,4,4,3,2,"same V9 OTU recovered in taxogroup_middle is Chloropicon, but inconsistently"
+chloroparvula,TARA_PSE_93_MAG_00236,More Probable,756b537b6d951b323ed9a3334ed5c1d36973a4d9,4,4,5,2,"same V9 OTU recovered in taxogroup_middle is Chloropicon, but inconsistently"
+Chloropicon,TARA_AON_82_MAG_00229,Less Probable,3e9badf5bfe6ccb477b6b6b7444f02d72b12b1e5,2,0,5,0,Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00032
+Chloropicon,TARA_AON_82_MAG_00229,Less Probable,1f9bc45ded5aefb6ed99199903cf146d133c5033,2,2,8,0,Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00032
+Chloropicon,TARA_AOS_82_MAG_00032,More Probable,3e9badf5bfe6ccb477b6b6b7444f02d72b12b1e5,4,4,3,0,Pattern for this SMAG is very similar to TARA_AON_82_MAG_00229
+Chloropicon,TARA_AOS_82_MAG_00032,More Probable,1f9bc45ded5aefb6ed99199903cf146d133c5033,4,1,8,0,Pattern for this SMAG is very similar to TARA_AON_82_MAG_00229
+Chloropicon,TARA_PSE_93_MAG_00200,Probable,3c37d9bbcc5b3227114ae3afaae2ebacef2561ba,2,2,1,1,"same V9 OTU recovered in taxogroup_middle is chloroparvula, but inconsistently"
+Chloropicon,TARA_PSW_86_MAG_00160,Yes,747033d2424fe64379fc7d8cabadda347f7ead2c,4,4,4,1,"same V9 OTU recovered in taxogroup_middle is New_chlorophyta_01, but inconsistently"
+Cylindrotheca,TARA_AON_82_MAG_00159,More Probable,681a89b39117f06409a4019e6151bacc519b557a,NA,NA,0,0,V9 OTU not taxonomized to genus level
+Emiliania,TARA_AON_82_MAG_00351,NA,dfaa4578213ad7a1abbdb014c86aa3b4503bf6ab,NA,2/NA,8,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Emiliania,TARA_AOS_82_MAG_00161,NA,dfaa4578213ad7a1abbdb014c86aa3b4503bf6ab,NA,2/NA,8,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Emiliania,TARA_ARC_108_MAG_00275,NA,dfaa4578213ad7a1abbdb014c86aa3b4503bf6ab,NA,0/NA,8,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Emiliania,TARA_MED_95_MAG_00430,NA,dfaa4578213ad7a1abbdb014c86aa3b4503bf6ab,NA,2/NA,8,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Emiliania,TARA_PSE_93_MAG_00235,NA,dfaa4578213ad7a1abbdb014c86aa3b4503bf6ab,NA,2/NA,8,0,single V9 OTU corresponds to all the SMAGs significantly better than the other  V9 OTU  in the taxonomic subset
+Florenciella,TARA_ARC_108_MAG_00262,More Probable,921d39a7a9d19a89bb67c9b08aa2b7985fe98f61,3,3,4,0,Pattern for this SMAG is very similar to TARA_SOC_28_MAG_00069
+Florenciella,TARA_SOC_28_MAG_00069,More Probable,921d39a7a9d19a89bb67c9b08aa2b7985fe98f61,4,4,4,0,Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00262
+Florenciella,TARA_MED_95_MAG_00475,More Probable,0890fe9740844d73dc810c7f23c00015530625c9,3,3,0,0,
+Fragilariopsis,TARA_AOS_82_MAG_00176,Less Probable,e8055bf1484f0ef1d0f0f67f4a3699f5490631fe,4,2,8,2,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_AOS_82_MAG_00176,Less Probable,af0b2f0a8b345b54b5d7b314178a1ac4c2ed69a3,4,2,8,4,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_AOS_82_MAG_00176,Less Probable,305fd2498796bfc1f3d2bf7f9d66954c3ed33ac5,4,4,8,0,
+Fragilariopsis,TARA_ARC_108_MAG_00187,Less Probable,e8055bf1484f0ef1d0f0f67f4a3699f5490631fe,4,4,8,2,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_ARC_108_MAG_00187,Less Probable,af0b2f0a8b345b54b5d7b314178a1ac4c2ed69a3,4,4,8,4,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_ARC_108_MAG_00187,Less Probable,305fd2498796bfc1f3d2bf7f9d66954c3ed33ac5,4,4,8,0,
+Fragilariopsis,TARA_SOC_28_MAG_00031,Less Probable,e8055bf1484f0ef1d0f0f67f4a3699f5490631fe,4,4,8,2,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_SOC_28_MAG_00031,Less Probable,af0b2f0a8b345b54b5d7b314178a1ac4c2ed69a3,4,4,8,4,same V9 OTU recovered in taxogroup_middle is Unidentified_Bacillariaceae
+Fragilariopsis,TARA_SOC_28_MAG_00031,Less Probable,305fd2498796bfc1f3d2bf7f9d66954c3ed33ac5,4,4,8,0,
+Fragilariopsis,TARA_ARC_108_MAG_00122,Less Probable,d8cb70d697b25b8d38e8e62658073742c2626b13,0,0,1,0,
+Fragilariopsis,TARA_SOC_28_MAG_00071,Less Probable,d8cb70d697b25b8d38e8e62658073742c2626b13,0,0,1,0,
+Geminigera,TARA_ARC_108_MAG_00244,More Probable,33368757d8b7ad794a2cdc7d58a8f48151e8d5b1,NA,2/NA,0,0,
+Geminigera,TARA_ARC_108_MAG_00244,More Probable,fca7dc6b8b7310d0fe058c01327a15f898893d66,NA,2/NA,0,0,
+Geminigera,TARA_ARC_108_MAG_00312,More Probable,afc25d362957cfa2e8bf96cdc196bfb11fef6ad9,NA,2/NA,2,0,
+Geminigera,TARA_ARC_108_MAG_00312,More Probable,b423767398a7e1fa8a163e0f31cd808f3a30c4d7,NA,2/NA,0,0,
+Haptolina,TARA_ARC_108_MAG_00303,More Probable,6aed8e30c02a96997baa8d2ba3c0dede3a2cde4b,NA,2/NA,1,1,"same V9 OTU recovered in taxogroup_middle is New_Chrysochromulinaceae_01, but inconsistently"
+Haptolina,TARA_ARC_108_MAG_00323,More Probable,6aed8e30c02a96997baa8d2ba3c0dede3a2cde4b,NA,2/NA,1,1,"same V9 OTU recovered in taxogroup_middle is New_Chrysochromulinaceae_01, but inconsistently"
+Leptocylindrus,TARA_ARC_108_MAG_00108,Yes,dd8f3149d3102222fc7faad7c55cddb9baef3ffd,4,4,NA,0,
+Mantoniella,TARA_PSW_86_MAG_00295,Yes,f7157cc30a81a6afbe16b9629287f6aac96e987d,3,3,NA,14,"same V9 OTU recovered in taxogroup_middle is Micromonas, but inconsistently"
+Micromonas,TARA_ARC_108_MAG_00100,Probable,93ea2747f5a3cbee4ffda130a57b2cddbedc0352,4,4,20,0,Other V9 OTUs have much lower correspondence
+Micromonas,TARA_AON_82_MAG_00097,Probable,e17adfd1e47a6795e7cc6150f33055a78411da64,4,4,43,0,
+Micromonas,TARA_AON_82_MAG_00118,More Probable,495f75dd678a6700fd8f3fc3fab2aa87800d0aa1,4,4,47,0,
+Micromonas,TARA_AON_82_MAG_00297,More Probable,bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3,4,4,35,0,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00233, TARA_ASE_2028_MAG_00032, TARA_MED_95_MAG_00308, TARA_AON_82_MAG_00297, TARA_AOS_82_MAG_00137"
+Micromonas,TARA_AOS_82_MAG_00137,More Probable,bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3,4,4,35,0,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00233, TARA_ASE_2028_MAG_00032, TARA_MED_95_MAG_00308, TARA_AON_82_MAG_00297, TARA_AOS_82_MAG_00137"
+Micromonas,TARA_ARC_108_MAG_00233,More Probable,bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3,4,4,35,0,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00233, TARA_ASE_2028_MAG_00032, TARA_MED_95_MAG_00308, TARA_AON_82_MAG_00297, TARA_AOS_82_MAG_00137"
+Micromonas,TARA_ASE_2028_MAG_00032,More Probable,bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3,4,4,35,0,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00233, TARA_ASE_2028_MAG_00032, TARA_MED_95_MAG_00308, TARA_AON_82_MAG_00297, TARA_AOS_82_MAG_00137"
+Micromonas,TARA_MED_95_MAG_00308,More Probable,bf4ad8ea6f40e1d7a07ff2c107fdf739d88f89f3,4,4,35,0,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00233, TARA_ASE_2028_MAG_00032, TARA_MED_95_MAG_00308, TARA_AON_82_MAG_00297, TARA_AOS_82_MAG_00137"
+Micromonas,TARA_ARC_108_MAG_00063,More Probable,7d0db08fc17939858a2ea018f83813ad8c9f575b,4,4,25,0,
+Micromonas,TARA_ARC_108_MAG_00100,More Probable,93ea2747f5a3cbee4ffda130a57b2cddbedc0352,4,4,20,0,Other V9 OTUs have much lower correspondence
+Micromonas,TARA_ION_45_MAG_00143,More Probable,ad17c99efd85e24991619ffe3230f95aeaa1c749,4,4,15,0,"Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00065, TARA_MED_95_MAG_00447,TARA_ION_45_MAG_00143, Other V9 OTUs have much lower correspondence"
+Micromonas,TARA_IOS_50_MAG_00065,More Probable,ad17c99efd85e24991619ffe3230f95aeaa1c749,4,4,15,0,"Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00065, TARA_MED_95_MAG_00447,TARA_ION_45_MAG_00143, Other V9 OTUs have much lower correspondence"
+Micromonas,TARA_MED_95_MAG_00447,More Probable,ad17c99efd85e24991619ffe3230f95aeaa1c749,4,4,15,0,"Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00065, TARA_MED_95_MAG_00447,TARA_ION_45_MAG_00143, Other V9 OTUs have much lower correspondence"
+Micromonas,TARA_MED_95_MAG_00390,Less Probable,be892bb6bb274afd7b8b1ac43b904e772e13fb0f,3,2,54,0,"Pattern for this SMAG is very similar to TARA_MED_95_MAG_00390, TARA_AOS_82_MAG_00181"
+Micromonas,TARA_AOS_82_MAG_00181,Less Probable,be892bb6bb274afd7b8b1ac43b904e772e13fb0f,3,2,54,0,"Pattern for this SMAG is very similar to TARA_MED_95_MAG_00390, TARA_AOS_82_MAG_00181"
+Micromonas,TARA_PSW_86_MAG_00105,More Probable,f6d353cb19d24cb217eb92ab4ab6bfbf7c045a66,4,4,31,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00105, TARA_PSW_86_MAG_00075"
+Micromonas,TARA_PSW_86_MAG_00075,More Probable,f6d353cb19d24cb217eb92ab4ab6bfbf7c045a66,4,4,31,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00105, TARA_PSW_86_MAG_00075"
+Micromonas,TARA_ION_45_MAG_00153,Less Probable,f6d353cb19d24cb217eb92ab4ab6bfbf7c045a66,2/NA,0,33,0,"Pattern for this SMAG is somewhat similar to TARA_PSW_86_MAG_00105, TARA_PSW_86_MAG_00075"
+Minidiscus,TARA_ARC_108_MAG_00219,Less Probable,3326ac4918f33a5139b62669457c3b8179e796cb,2/NA,2/NA,4,0,
+Minidiscus,TARA_PSW_86_MAG_00276,Less Probable,3326ac4918f33a5139b62669457c3b8179e796cb,3,3,3,,
+New_Bacillariaceae_02,TARA_ARC_108_MAG_00137,More Probable,1e79fa12c6b40b3b5d4686d215990d1ab1665be3,4,4,2,12,"same V9 OTU recovered in taxogogroup_middle and genus in Chaetoceros; consistently, but resulting in unlikely matches"
+New_Bacillariaceae_02,TARA_ARC_108_MAG_00276,Less Probable,4fa02791553792e89967a1f8c32d185bc0ce1d7b,0,2,0,0,
+New_Bicosoecales_01,TARA_PSE_93_MAG_00216,Less Probable,168dcea7206228d45256e528db3847f2ba347b72,NA,2,0,0,
+New_Chlorophyta_01,TARA_ION_45_MAG_00163,Probable,196d89e0451637bb7e2ef29050868bb5fff83481,2,0,0,0,
+New_Chlorophyta_01,TARA_ION_45_MAG_00163,More Probable,bf8ff709eb4bbb8843daff180df76c47b46f10b2,4,2,2,0,
+New_Chlorophyta_01,TARA_MED_95_MAG_00216,Yes,9a1ff28291f2c29c5ecb4a031767b3e394017690,4,4,0,0,
+New_Chlorophyta_01,TARA_PSE_93_MAG_00141,Less Probable,c8ab69958589c1446c0def761b5ebeee87d43901,2/NA,NA,0,0,
+New_Chlorophyta_01,TARA_PSE_93_MAG_00228,Yes,ec27363787b120f99cfbc8650d3499b64ac692e9,4,4,0,0,
+New_Chlorophyta_01,TARA_PSW_86_MAG_00208,Yes,4be33d73903681cf17b3f3ed1ccc2f6ca2f96b85,4,4,0,0,
+New_Chlorophyta_01,TARA_PSW_86_MAG_00270,Less Probable,747033d2424fe64379fc7d8cabadda347f7ead2c,2/NA,NA,0,8,"same V9 OTU recovered in Chloropicon, consistently, being the candidate match"
+New_Choanozoa_01,TARA_ARC_108_MAG_00247,Less Probable,e64f58640dab18d29441b85c3e9f213148ea9dff,2/NA,NA,1,0,
+New_Choanozoa_01,TARA_ARC_108_MAG_00250,More Probable,c436ce12741913debb176580282ce130fef465f4,4,4,4,0,
+New_Choanozoa_01,TARA_PSE_93_MAG_00240,Yes,564ec150ac7ec5842e0bf876f97e90b9d5391c60,4,4,0,0,
+New_Choanozoa_01,TARA_SOC_28_MAG_00054,More Probable,f8e8a55ebc01a050df1d90c130ae782ac4cb8a8f,4,4,3,0,
+New_Choanozoa_01,TARA_SOC_28_MAG_00062,More Probable,b391e1f7d9bf3bb9b712ac4547e2e147e1de6600,4,4,3,0,
+New_Choreotrichida _01,TARA_AOS_82_MAG_00178,Less Probable,54d60eeb04740b1a630b7b902499db376d887164,2/NA,0,0,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00273,Less Probable,e6f2501608f058898fda4f0d8be18dc936510be0,2/NA,NA,4,1,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00273, TARA_ARC_108_MAG_00298; same V9 OTU recovered in New_Ciliophora_01, inconsistently"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00298,Less Probable,e6f2501608f058898fda4f0d8be18dc936510be0,2/NA,NA,4,1,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00273, TARA_ARC_108_MAG_00298; same V9 OTU recovered in New_Ciliophora_01, inconsistently"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00296,Less Probable,230742277b9a8791f76f7999620f7cd2b4f8fc34,4,2,8,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00296,Less Probable,56b2bae7f6db6fe75207a4d83c5820ece26de69d,4,2,8,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00296,Less Probable,e8d6646a2f61510e9ce66042d1d6ace2f0053848,2,0,5,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00277,Less Probable,56b2bae7f6db6fe75207a4d83c5820ece26de69d,3,3,8,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00277,Less Probable,230742277b9a8791f76f7999620f7cd2b4f8fc34,3,3,8,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00277,Less Probable,e8d6646a2f61510e9ce66042d1d6ace2f0053848,2,0,5,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00296, TARA_ARC_108_MAG_00277"
+New_Choreotrichida _01,TARA_ARC_108_MAG_00311,Less Probable,316a18aa4c376fb5c9b7a2ae040094e997efb475,2/NA,0,0,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00321,Less Probable,95ce9752695818b1529d944f64380d345a569f54,2,0,0,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00321,Less Probable,55e4459857935a32a5c0914cd0049faecb42c923,4,2,0,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00322,Probable,56b2bae7f6db6fe75207a4d83c5820ece26de69d,4,4,8,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00322,Probable,e37b8f215b3e056c39de0f342f6a21a135af65d0,4,4,1,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00322,Less Probable,79f75af13c35567ae7df5701c880562eaf30898a,2,0,2,0,
+New_Choreotrichida _01,TARA_ARC_108_MAG_00322,Probable,230742277b9a8791f76f7999620f7cd2b4f8fc34,4,2,8,0,
+New_Choreotrichida _01,TARA_IOS_50_MAG_00158,Less Probable,0530af9c82d816b1a9f1fc059d034a92eb25e755,2/NA,0,2,0,"Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00158, TARA_PSE_93_MAG_00263"
+New_Choreotrichida _01,TARA_PSE_93_MAG_00263,Less Probable,0530af9c82d816b1a9f1fc059d034a92eb25e755,2/NA,0,2,0,"Pattern for this SMAG is very similar to TARA_IOS_50_MAG_00158, TARA_PSE_93_MAG_00263"
+New_Choreotrichida _01,TARA_MED_95_MAG_00514,Less Probable,0ff98cc0674ea79c354e1601333fdc54df9d5544,2/NA,0,0,0,
+New_Choreotrichida _01,TARA_MED_95_MAG_00516,Less Probable,46479f9ec89ac16f2e642a1bd493fda929560366,2/NA,0,0,0,
+New_Choreotrichida _01,TARA_SOC_28_MAG_00073,Less Probable,babf6d7b9917332411d58727dcbef8cc8df461eb,2/NA,0,4,0,"Pattern for this SMAG is very similar to TARA_SOC_28_MAG_00073, TARA_SOC_28_MAG_00076, TARA_SOC_28_MAG_00080"
+New_Choreotrichida _01,TARA_SOC_28_MAG_00076,Less Probable,babf6d7b9917332411d58727dcbef8cc8df461eb,2/NA,0,4,0,"Pattern for this SMAG is very similar to TARA_SOC_28_MAG_00073, TARA_SOC_28_MAG_00076, TARA_SOC_28_MAG_00080"
+New_Choreotrichida _01,TARA_SOC_28_MAG_00080,Less Probable,babf6d7b9917332411d58727dcbef8cc8df461eb,2/NA,0,4,0,"Pattern for this SMAG is very similar to TARA_SOC_28_MAG_00073, TARA_SOC_28_MAG_00076, TARA_SOC_28_MAG_00080"
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00278,Less Probable,d7b8b82a65e5d1279d5410333eacfa585fd2e1c5,2/NA,0,5,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00283,Probable,ce78c55fe9badbaf2dc1bf37984fae34a1517e6a,4,2,1,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00283,Probable,2e0775f4370cdfecadb55ae7f53eb5c1f58f2625,4,2,0,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00283,Probable,9bbc3834cebbe2665e5a16fcb9f69f4588336cdd,2,0,0,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00315,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00140,Less Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,2/NA,NA,24,0,"Pattern for this SMAG is somewhat similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00141,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00149,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00184,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00289,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00326,Probable,846312ea4dd77c5ddc311596734da8afcf84eee8,4,2,22,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00315,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00141,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00149,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00184,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00289,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00326,Probable,ae1b324fe1a7db86761cfe1774bb84987b263f65,4,2,25,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00315, TARA_AOS_82_MAG_00140, TARA_AOS_82_MAG_00141, TARA_AOS_82_MAG_00149,TARA_AOS_82_MAG_00184,TARA_ARC_108_MAG_00289,TARA_ARC_108_MAG_00326"
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00341,Less Probable,0a808295e4784681f0884ab13f8bddf8229fd572,2,1,2,3,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00341,Less Probable,44fff8628e45464177ef868673376140fabaff30,NA/2,NA,0,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00354,Less Probable,791c8c754a891cea5ef59689c45a4cf7288c4fdf,NA/2,0,0,0,
+New_Chrysochromulinaceae_01,TARA_AON_82_MAG_00356,Less Probable,19db26589d574cf8a31cafd4ce126bef62c6cc4b,2/NA,NA,0,0,
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00144,Less Probable,b488e1d3b997145469c004a1d5cc8cfe85152cb1,2/NA,NA,0,0,
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00144,Less Probable,1da0fdf0859d311f48c1789526f652faf71cbf06,2/NA,NA,0,0,
+New_Chrysochromulinaceae_01,TARA_AOS_82_MAG_00144,Less Probable,d2db2652ac2f18c45e89336c1ced89ec7259169d,2/NA,NA,0,0,
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00246,Probable,1f2ddf8cbb8f8297f5ae420028bb50c89b8cf195,4,4,6,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00246, TARA_ARC_108_MAG_00320"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00320,Less Probable,1f2ddf8cbb8f8297f5ae420028bb50c89b8cf195,3,3,6,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00246, TARA_ARC_108_MAG_00320"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00320,Less Probable,b545f07301f1454150ca92d30eef86b630b8cd62,2,1,4,0,"Pattern for this SMAG is somewhat similar to TARA_ARC_108_MAG_00246, TARA_ARC_108_MAG_00320"
+New_Chrysochromulinaceae_01,TARA_ARC_108_MAG_00259,Less Probable,dbfe111d5a37ff43240320d118a340dbfd5f2fad,2,2,2,0,
+New_Chrysochromulinaceae_01,TARA_IOS_2018_MAG_00068,Probable,6ee48724ae23a0bba0a7585324a82fdb65edd2ca,4,4,9,0,"Pattern for this SMAG is very similar to TARA_IOS_2018_MAG_00068, TARA_MED_95_MAG_00458, TARA_PSW_86_MAG_00317"
+New_Chrysochromulinaceae_01,TARA_MED_95_MAG_00458,Probable,6ee48724ae23a0bba0a7585324a82fdb65edd2ca,4,4,9,0,
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00317,Probable,6ee48724ae23a0bba0a7585324a82fdb65edd2ca,4,4,9,0,
+New_Chrysochromulinaceae_01,TARA_IOS_2018_MAG_00068,Less Probable,30d03d0ad78f180d1d2a69ebe37924ce77811bd2,2,0,5,0,
+New_Chrysochromulinaceae_01,TARA_MED_95_MAG_00458,Probable,30d03d0ad78f180d1d2a69ebe37924ce77811bd2,4,4,3,0,
+New_Chrysochromulinaceae_01,TARA_PON_109_MAG_00232,Yes,db79d2a1a21a924f8b4092743d94bf90a37e035b,4,4,0,0,
+New_Chrysochromulinaceae_01,TARA_PSE_93_MAG_00218,More Probable,e6d5dce3537f2ae0de506a38649349e19ae06c0e,4,2,4,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00218, TARA_PSW_86_MAG_00318"
+New_Chrysochromulinaceae_01,TARA_PSE_93_MAG_00267,Less Probable,623a96720d83790d70904b0809abfc7cb61c4a23,2,0,0,0,
+New_Chrysochromulinaceae_01,TARA_PSE_93_MAG_00267,More Probable,67bfcc69973b2a3b4d39c66c20be13ae7cf8e4d3,4,2,0,0,
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00266,Less Probable,d7b8b82a65e5d1279d5410333eacfa585fd2e1c5,0,1,5,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00266, TARA_PSW_86_MAG_00285"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00285,Less Probable,d7b8b82a65e5d1279d5410333eacfa585fd2e1c5,0,1,5,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00266, TARA_PSW_86_MAG_00285"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00268,Probable,f38ca6dd74525c49c0857bbae2d12275f368b0eb,1,1,5,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00268, TARA_PSW_86_MAG_00275"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00275,Probable,f38ca6dd74525c49c0857bbae2d12275f368b0eb,1,1,5,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00268, TARA_PSW_86_MAG_00275"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00280,Less Probable,28ce36a851885e95602270d182fb6277c1f73c5a,2/NA,0,6,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00280, TARA_PSW_86_MAG_00283"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00283,Less Probable,28ce36a851885e95602270d182fb6277c1f73c5a,2/NA,0,6,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00280, TARA_PSW_86_MAG_00283"
+New_Chrysochromulinaceae_01,TARA_PSW_86_MAG_00318,More Probable,e6d5dce3537f2ae0de506a38649349e19ae06c0e,2,2,4,0,"Pattern for this SMAG is very similar to TARA_PSW_86_MAG_00218, TARA_PSW_86_MAG_00318"
+New_Chrysophyceae,TARA_ARC_108_MAG_00215,Less Probable,8c5dcc93f9b051bd88b37fbebc431e479a45df9a,0,2,0,0,
+New_Chrysophyceae,TARA_ARC_108_MAG_00215,Less Probable,41915a98ae23509404bdd0aa5ac4ae75cff2ae51,1,0,1,0,
+New_Chrysophyceae,TARA_ARC_108_MAG_00224,Probable,a00b0e970321103e2fb5d69530d07a51d46426bb,2,2,0,0,
+New_Chrysophyceae,TARA_ARC_108_MAG_00261,Probable,da2f3c885f49c7413ee37fd25ff58b5e58ef5f79,2,2,0,0,
+New_Chrysophyceae,TARA_ION_45_MAG_00170,Probable,058c8b2b09d23a845e3be904e0ff0f8b7937d3f6,2,2,7,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_MED_95_MAG_00428,Probable,058c8b2b09d23a845e3be904e0ff0f8b7937d3f6,2,2,7,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_ION_45_MAG_00170,Probable,ebf991d3805d6cec1bb2fce3a608fae8f2159756,2,1,4,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_MED_95_MAG_00428,Probable,ebf991d3805d6cec1bb2fce3a608fae8f2159756,2,1,4,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_ION_45_MAG_00170,Less Probable,d6de7b95464c7c4aab7c56d966d34059fed8a9fd,2,1,11,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_MED_95_MAG_00428,Less Probable,d6de7b95464c7c4aab7c56d966d34059fed8a9fd,1,1,11,0,"Pattern for this SMAG is very similar to TARA_ION_45_MAG_00170, TARA_MED_95_MAG_00428"
+New_Chrysophyceae,TARA_MED_95_MAG_00362,Probable,9beeed1beefaf03cfabb0f4c9c6c28dae0672ecd,2,2,6,0,
+New_Chrysophyceae,TARA_MED_95_MAG_00389,Probable,58bc4a02c70a194f48568a49b4f87072cc44fcb3,2,2,1,0,
+New_Chrysophyceae,TARA_MED_95_MAG_00389,Less Probable,bb97a4aaa0cf834ccb61500426c54b609420828f,2,0,4,0,
+New_Chrysophyceae,TARA_MED_95_MAG_00415,Less Probable,058c8b2b09d23a845e3be904e0ff0f8b7937d3f6,1,2,7,0,
+New_Chrysophyceae,TARA_MED_95_MAG_00415,Less Probable,d6de7b95464c7c4aab7c56d966d34059fed8a9fd,1,2,11,0,
+New_Chrysophyceae,TARA_RED_2018_MAG_00112,Probable,e189cb123288db7d30b52c65d03e498e15474536,2/NA,NA,0,0,
+New_Ciliophora_01,TARA_ARC_108_MAG_00299,Less Probable,8cf83fae3684c0110d9ad6456da506413293fb80,2/NA,NA,0,3,"same V9 OTU recovered in New_Choreotrichida _01 and Strombidium, inconsistently"
+New_Ciliophora_01,TARA_ARC_108_MAG_00305,Less Probable,60f2f7aa9b86f44e8738426430c0480a9e002b52,2/NA,NA,0,0,
+New_Ciliophora_01,TARA_ARC_108_MAG_00305,Less Probable,11d077bddd2db93e1611ee603203a786e0be59ac,2/NA,NA,0,0,
+New_Cyrtolophosidida_01,TARA_SOC_28_MAG_00066,More Probable,fa54a54ed2142c33f85c69e3781066ccb9108faa,2,4,0,0,
+New_MALV-I_01,TARA_ARC_108_MAG_00236,Less Probable,04c51bb1bc1bb453d8b014d3bce3bb050ebccde2,2,2,0,0,
+New_MAST-4,Metagenome_centric_SAG_TOSAG00_10,Less Probable,8550e373bc4c3c8585e109afc6d25fbbbc7440ff,0,2,8,0,
+New_MAST-4,TARA_AON_82_MAG_00137,More Probable,f37be9188bbb84e6bb1f025f0956235da26d376a,2/NA,2/NA,11,0,"Pattern for this SMAG is somewhat similar to TARA_AON_82_MAG_00137, TARA_AON_82_MAG_00160, TARA_AON_82_MAG_00276"
+New_MAST-4,TARA_AON_82_MAG_00160,Probable,f37be9188bbb84e6bb1f025f0956235da26d376a,2,0,12,0,"Pattern for this SMAG is somewhat similar to TARA_AON_82_MAG_00137, TARA_AON_82_MAG_00160, TARA_AON_82_MAG_00276"
+New_MAST-4,TARA_AON_82_MAG_00276,Probable,f37be9188bbb84e6bb1f025f0956235da26d376a,2,0,12,0,"Pattern for this SMAG is somewhat similar to TARA_AON_82_MAG_00137, TARA_AON_82_MAG_00160, TARA_AON_82_MAG_00276"
+New_MAST-4,TARA_AOS_82_MAG_00135,Probable,d8893a3b35b8f32e8410c9f02b8ee9441e93ef54,3,3,8,0,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00135, TARA_AOS_82_MAG_00150, TARA_ARC_108_MAG_00220"
+New_MAST-4,TARA_AOS_82_MAG_00150,Probable,d8893a3b35b8f32e8410c9f02b8ee9441e93ef54,0,2,10,0,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00135, TARA_AOS_82_MAG_00150, TARA_ARC_108_MAG_00220"
+New_MAST-4,TARA_ARC_108_MAG_00220,Probable,d8893a3b35b8f32e8410c9f02b8ee9441e93ef54,0,2,10,0,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00135, TARA_AOS_82_MAG_00150, TARA_ARC_108_MAG_00220"
+New_MAST-4,TARA_IOS_50_MAG_00098,Less Probable,e42a3277b33221b37e3d2081c1a676214a3fcffc,0,1,11,0,"Pattern for this SMAG is somewhat similar to TARA_IOS_50_MAG_00098, TARA_PON_109_MAG_00219"
+New_MAST-4,TARA_PON_109_MAG_00219,Less Probable,e42a3277b33221b37e3d2081c1a676214a3fcffc,0,1,11,0,"Pattern for this SMAG is somewhat similar to TARA_IOS_50_MAG_00098, TARA_PON_109_MAG_00219"
+New_MAST-4,TARA_MED_95_MAG_00378,Probable,5904bcc248b9e42638ef0071f659dd0284ce53df,3,3,4,0,
+Ostreococcus,TARA_AON_82_MAG_00012,Probable,6b514fe39086fcf7c1325878394f32b5e6141e95,4,4,11,11,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00012, TARA_ION_45_MAG_00010, TARA_PON_109_MAG_00166, TARA_RED_19_MAG_00007; same V9 OTU recovered in Bathycoccus, consistently, but not as a probable match"
+Ostreococcus,TARA_ION_45_MAG_00010,More Probable,6b514fe39086fcf7c1325878394f32b5e6141e95,4,4,11,11,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00012, TARA_ION_45_MAG_00010, TARA_PON_109_MAG_00166, TARA_RED_19_MAG_00007; same V9 OTU recovered in Bathycoccus, consistently, but not as a probable match"
+Ostreococcus,TARA_PON_109_MAG_00166,Less Probable,6b514fe39086fcf7c1325878394f32b5e6141e95,2,2,12,11,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00012, TARA_ION_45_MAG_00010, TARA_PON_109_MAG_00166, TARA_RED_19_MAG_00007; same V9 OTU recovered in Bathycoccus, consistently, but not as a probable match"
+Ostreococcus,TARA_RED_19_MAG_00007,Probable,6b514fe39086fcf7c1325878394f32b5e6141e95,4,4,11,11,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00012, TARA_ION_45_MAG_00010, TARA_PON_109_MAG_00166, TARA_RED_19_MAG_00007; same V9 OTU recovered in Bathycoccus, consistently, but not as a probable match"
+Pelagococcus,TARA_AOS_82_MAG_00162,Less Probable,c6eaf8062e1790baec30d73f9694a6da4ead21cd,1/NA,NA,3,1,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00162, TARA_ARC_108_MAG_00263, same V9 OTU recovered in Aureococcus, inconsistently"
+Pelagococcus,TARA_AOS_82_MAG_00162,Less Probable,9fbda6a96c62b77a76455d0632ce1c08531a836d,0/NA,NA,2,12,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00162, TARA_ARC_108_MAG_00263, same V9 OTU recovered in Aureococcus, inconsistently and in Sister_Pelgomonas, consistently"
+Pelagococcus,TARA_ARC_108_MAG_00263,Probable,c6eaf8062e1790baec30d73f9694a6da4ead21cd,1,2,2,1,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00162, TARA_ARC_108_MAG_00263, same V9 OTU recovered in Aureococcus, inconsistently"
+Pelagococcus,TARA_ARC_108_MAG_00263,Probable,9fbda6a96c62b77a76455d0632ce1c08531a836d,0,2,1,12,"Pattern for this SMAG is somewhat similar to TARA_AOS_82_MAG_00162, TARA_ARC_108_MAG_00263, same V9 OTU recovered in Aureococcus, inconsistently and in Sister_Pelgomonas, consistently"
+Phaeocystis,TARA_AON_82_MAG_00318,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_AOS_82_MAG_00154,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_ION_45_MAG_00169,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_IOS_50_MAG_00142,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_PON_109_MAG_00250,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_PSE_93_MAG_00226,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_PSW_86_MAG_00284,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,2,30,0,"Pattern for this SMAG is very similar to TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_AON_82_MAG_00337,Probable,45a0850e5fa08e2758aa58a4f8dee03b1cff2ad7,4,4,30,0,
+Phaeocystis,TARA_AOS_82_MAG_00182,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,1,2,42,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_AOS_82_MAG_00183,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,2,4,41,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_ASW_2018_MAG_00036,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,1,2,42,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_SOC_28_MAG_00057,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,2,4,41,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_SOC_28_MAG_00059,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,2,4,41,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_SOC_28_MAG_00064,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,1,2,42,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_SOC_28_MAG_00067,Less Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,0,0,44,0,"Pattern for this SMAG is very similar to TARA_AOS_82_MAG_00182, TARA_AOS_82_MAG_00183, TARA_ASW_2018_MAG_00036, TARA_SOC_28_MAG_00057, TARA_SOC_28_MAG_00059, TARA_SOC_28_MAG_00064, TARA_SOC_28_MAG_00067"
+Phaeocystis,TARA_ARC_108_MAG_00248,Probable,8e76a20e6d60d3490b0c2ba95222ceb72823dd86,3,3,9,1,"Pattern for this SMAG is very similar to TARA_ARC_108_MAG_00248, TARA_ARC_108_MAG_00268; same V9 OTU recovered in New_Chrysochromulinaceae_01, inconsistently"
+Phaeocystis,TARA_ARC_108_MAG_00268,Probable,8e76a20e6d60d3490b0c2ba95222ceb72823dd86,2,2,10,1,
+Phaeocystis,TARA_ARC_108_MAG_00319,Probable,958efdcdd035174c077fb3e050e2fffadb5911e1,4,2,41,0,
+Phaeocystis,TARA_ARC_108_MAG_00319,Less Probable,8e76a20e6d60d3490b0c2ba95222ceb72823dd86,4,2,9,1,
+Phaeocystis,TARA_ION_45_MAG_00168,Less Probable,96c5901e7210ca1d64ab089e389555218b7f293f,0,0,31,0,"Pattern for this SMAG is somewhat similar to TARA_ION_45_MAG_00168, TARA_AON_82_MAG_00318, TARA_AOS_82_MAG_00154, TARA_ION_45_MAG_00169, TARA_IOS_50_MAG_00142, TARA_PON_109_MAG_00250, TARA_PSE_93_MAG_00226, TARA_PSW_86_MAG_00284"
+Phaeocystis,TARA_MED_95_MAG_00438,Probable,45a0850e5fa08e2758aa58a4f8dee03b1cff2ad7,3,3,30,0,"Pattern for this SMAG is very similar to TARA_MED_95_MAG_00438, TARA_MED_95_MAG_00492, "
+Phaeocystis,TARA_MED_95_MAG_00492,Probable,45a0850e5fa08e2758aa58a4f8dee03b1cff2ad7,3,3,30,0,"Pattern for this SMAG is very similar to TARA_MED_95_MAG_00438, TARA_MED_95_MAG_00492, "
+Picochlorum,TARA_AON_82_MAG_00198,Yes,5d9040ac78e80b3a2908e69e16fac53659db7e70,NA,2,0,0,
+Prasinoderma,TARA_AON_82_MAG_00340,Yes,d704227dce00a0c92097ac4e4404d7a8615c070b,4,4,0,0,
+Prasinoderma,TARA_PSW_86_MAG_00253,Yes,4bde68c8a87e4f3d89408a499d4fb0a1596aac6a,4,4,0,0,
+Pseudo-nitzschia,TARA_ARC_108_MAG_00228,Less Probable,c6070e169f89c95433a06f7ed0bd5a3d135ea392,2/NA,NA,1,3,"same V9 OTU recovered in New_Bacillariaceae _02 and Synadropsis, inconsistently"
+Pseudo-nitzschia,TARA_PSE_93_MAG_00213,Less Probable,62dd54f24b1b8c95bd0f8b5e3b765cedc27d2878,1,0,2,0,
+Pseudo-nitzschia,TARA_PSW_86_MAG_00236,Less Probable,62dd54f24b1b8c95bd0f8b5e3b765cedc27d2878,1,0,2,0,
+Pseudo-nitzschia,TARA_PSE_93_MAG_00213,Less Probable,727adbf8252fd7ddcb59fe922e2a0c0f8ec0e1cb,2,1,2,0,
+Pseudo-nitzschia,TARA_PSW_86_MAG_00236,Less Probable,727adbf8252fd7ddcb59fe922e2a0c0f8ec0e1cb,0,1,3,0,
+Skeletonema,TARA_ARC_108_MAG_00138,More Probable,0e1dcda69643e10908bdf2bb3b5654cbcc0bfc93,2,2,1,1,"same V9 OTU recovered in Chaetoceros, inconsistently"
+Skeletonema,TARA_ARC_108_MAG_00253,More Probable,ed1069afac297c3042f5df64b25b7387b7f7516f,2,2,1,2,"same V9 OTU recovered in Chaetoceros, inconsistently"
+Skeletonema,TARA_MED_95_MAG_00394,Yes,1fb82da86af828d5055fa4f9a548ac30f61b7b0a,2,2,0,0,
+Synedropsis,TARA_ARC_108_MAG_00165,More Probable,9fadc49c85cd48355f4548cbabc895e4f34665e4,NA,2,0,0,
+Synedropsis,TARA_ARC_108_MAG_00165,More Probable,b0ef6c2fe07e2005435a67948669c013042eff89,NA,2,0,0,
+Thalassiosira,TARA_AOS_82_MAG_00147,Less Probable,0ff611bac2e2b9df8ec7265183b57768b3ad9397,0,2,0,2,"same V9 OTU recovered in Minidiscus, inconsistently"
+Thalassiosira,TARA_ARC_108_MAG_00252,Less Probable,9efc405f89227c3e0a5f2dbc36942ebae8b6c245,2,1,8,1,"same V9 OTU recovered in New_Chrysophyceae, inconsistently"
+Thalassiosira,TARA_ARC_108_MAG_00269,Less Probable,9efc405f89227c3e0a5f2dbc36942ebae8b6c245,2,2,8,1,"same V9 OTU recovered in New_Chrysophyceae, inconsistently"
+Thalassiosira,TARA_ARC_108_MAG_00313,More Probable,9efc405f89227c3e0a5f2dbc36942ebae8b6c245,4,4,7,1,"same V9 OTU recovered in New_Chrysophyceae, inconsistently"
+Thalassiosira,TARA_PSW_86_MAG_00261,Less Probable,0fa28ef81a560cf0f2c2cae3f8724e1b0e6af4fc,2/NA,NA,0,1,"same V9 OTU recovered in Minidiscus, inconsistently"
+Unidentified_Bacillariaceae,TARA_ARC_108_MAG_00286,Probable,af0b2f0a8b345b54b5d7b314178a1ac4c2ed69a3,3,3,0,12,"same V9 OTU recovered in Fragilariopsis, consistently"
+Unidentified_Bacillariaceae,TARA_ARC_108_MAG_00286,Less Probable,e8055bf1484f0ef1d0f0f67f4a3699f5490631fe,2,0,0,12,"same V9 OTU recovered in Fragilariopsis, consistently"
+Unidentified_Cercozoa,TARA_MED_95_MAG_00402,Less Probable,823453f1805c4c85183cf64ee20723eda331cd8c,2/NA,NA,0,0,
