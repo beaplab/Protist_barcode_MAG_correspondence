@@ -1,4 +1,4 @@
-# SMAG-V9OTU_crspd
+# Protist_barcode_MAG_correspondence
 Online Supplement to "On the relationship between protist metabarcoding and protist metagenome-assembled genomes"
 
 # R_scripts
